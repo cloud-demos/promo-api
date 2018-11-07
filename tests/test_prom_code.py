@@ -13,7 +13,7 @@ import tconfig
 from domain import models
 from domain import prom_code
 
-from domain.prom_code import GeneratePromoCodeResult
+from domain.prom_code import GeneratePromoCodeResult, DeactivatePromoCodeResult
 import domain
 
 
@@ -88,6 +88,7 @@ def test_promo_code_generation3(models_data, mocker):
         response_code, res = prom_code.generate_promo_code(1)
         assert res.expired()
 
+
 def test_promo_code_generation4(models_data, mocker):
     """
 
@@ -107,7 +108,6 @@ def test_promo_code_generation4(models_data, mocker):
         assert not res.expired()
 
 
-
 def test_promo_code_generation2(models_data, mocker):
     """
 
@@ -123,3 +123,19 @@ def test_promo_code_generation2(models_data, mocker):
         response_code, res = prom_code.generate_promo_code(1)
         assert res.expiration_time < mock_time_plus_2_months
 
+
+def test_promo_code_deactivation(models_data, mocker):
+    """
+
+    """
+    app = create_app()
+    mock_code = "mock_code"
+    mocker.patch.object(domain.utils, 'string_generator', return_value=mock_code)
+
+    with app.app_context():
+        response_code, res = prom_code.generate_promo_code(1)
+        assert res.active == True
+        response_code, res = prom_code.deactivate_promo_code(mock_code)
+        assert res.active == False
+        response_code, res = prom_code.deactivate_promo_code(mock_code + mock_code)
+        assert response_code == DeactivatePromoCodeResult.PromoCodeDoNotExists

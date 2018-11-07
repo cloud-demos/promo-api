@@ -55,6 +55,10 @@ class PromCode(db.Model):
         now = utils.get_now()
         return self.expiration_time < now
 
+    def deactivate(self):
+        self.active = False
+        db.session.commit()
+
 
 def create_database(config_file='../config.py'):
     """

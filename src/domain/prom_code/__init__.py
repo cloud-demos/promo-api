@@ -23,3 +23,16 @@ def generate_promo_code(event_id, data={}):
     db.session.commit()
 
     return GeneratePromoCodeResult.Ok, pcode
+
+
+DeactivatePromoCodeResult = Enum('DeactivatePromoCodeResult', 'PromoCodeDoNotExists Ok')
+
+
+def deactivate_promo_code(code):
+    pcode = db.session.query(PromCode).filter(PromCode.code == code).first()
+    if not pcode:
+        return DeactivatePromoCodeResult.PromoCodeDoNotExists, None
+
+    pcode.deactivate()
+
+    return DeactivatePromoCodeResult.Ok, pcode
