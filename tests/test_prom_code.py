@@ -139,3 +139,25 @@ def test_promo_code_deactivation(models_data, mocker):
         assert res.active == False
         response_code, res = prom_code.deactivate_promo_code(mock_code + mock_code)
         assert response_code == DeactivatePromoCodeResult.PromoCodeDoNotExists
+
+
+def test_promo_code_lists(models_data, mocker):
+    """
+
+    """
+    app = create_app()
+
+    with app.app_context():
+        response_code, res = prom_code.generate_promo_code(1)
+        response_code, res = prom_code.deactivate_promo_code(res.code)
+        response_code, res2 = prom_code.generate_promo_code(1)
+        response_code, res3 = prom_code.generate_promo_code(1)
+
+        actives = prom_code.get_active_promo_codes(13)
+        assert set([a.code for a in actives]) == set([])
+
+        actives = prom_code.get_active_promo_codes(1)
+        assert set([a.code for a in actives]) == set([res2.code, res3.code])
+
+        all_codes = prom_code.get_all_promo_codes(1)
+        assert set([a.code for a in all_codes]) == set([res2.code, res3.code, res.code])
