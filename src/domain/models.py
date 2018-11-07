@@ -21,7 +21,7 @@ class Event(db.Model):
     """Docs."""
 
     __tablename__ = 'events'
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     lat = db.Column(db.Float)
     lng = db.Column(db.Float)
     name = db.Column(db.String(50))
@@ -32,12 +32,13 @@ class Event(db.Model):
     def __str__(self):
         return self.name
 
+import domain.utils as utils
 
 class PromCode(db.Model):
     """Docs."""
 
     __tablename__ = 'prom_codes'
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     credit = db.Column(db.Integer)
     code = db.Column(db.String(20), primary_key=True)
     radius = db.Column(db.Float)
@@ -49,6 +50,10 @@ class PromCode(db.Model):
 
     def __str__(self):
         return self.code
+
+    def expired(self):
+        now = utils.get_now()
+        return self.expiration_time < now
 
 
 def create_database(config_file='../config.py'):
