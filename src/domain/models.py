@@ -79,6 +79,10 @@ class PromCode(db.Model):
         self.radius = radius
         db.session.commit()
 
+    def decrement_credit(self, cost):
+        self.credit -= cost
+        db.session.commit()
+
 
 def create_database(config_file='../config.py'):
     """

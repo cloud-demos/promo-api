@@ -43,6 +43,7 @@ PROJECT_ID = 'safeboda-213615'
 
 DEFAULT_CREDIT = 100.0
 CODE_LENGTH = 12
+MILES_COST = 1.0
 
 Expiration_time_Years = 0
 Expiration_time_Months = 0

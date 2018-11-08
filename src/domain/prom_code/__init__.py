@@ -94,6 +94,12 @@ def set_radius_to_prom_code(code, radius):
 RideFromPromCodeResult = Enum('RideFromPromCodeResult', 'PromCodeDoNotExists PromCodeInactive PromCodeInvalid Ok')
 
 import polyline
+from geopy import distance
+
+
+def calculate_value(origin_lat, origin_lng, dest_lat, dest_lng):
+    dist = distance.distance((origin_lat, origin_lng), (dest_lat, dest_lng)).miles
+    return dist * config.MILES_COST
 
 
 def get_ride_from_prom_code(origin_lat, origin_lng, dest_lat, dest_lng, code):
@@ -109,6 +115,9 @@ def get_ride_from_prom_code(origin_lat, origin_lng, dest_lat, dest_lng, code):
 
     if not (origin_valid or dest_valid):
         return RideFromPromCodeResult.PromCodeInvalid, None
+
+    cost = calculate_value(origin_lat, origin_lng, dest_lat, dest_lng)
+    pcode.decrement_credit(cost)
 
     return RideFromPromCodeResult.Ok, {
         "code": pcode,

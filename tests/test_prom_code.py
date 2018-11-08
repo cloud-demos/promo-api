@@ -212,11 +212,14 @@ def test_promo_code_valid_acording_distances_radius_changed_using_event(models_d
         assert res3.is_valid(1.5, 4.1)
 
 
-def test_ride_from_prom_code(models_data):
+def test_ride_from_prom_code(models_data, mocker):
     """
 
     """
     app = create_app()
+
+    mock_value = 2
+    mocker.patch.object(domain.prom_code, 'calculate_value', return_value=mock_value)
 
     with app.app_context():
         response_code, res = prom_code.generate_promo_code(1)
@@ -226,7 +229,12 @@ def test_ride_from_prom_code(models_data):
         resp_code, response = prom_code.get_ride_from_prom_code(1.5, 4.1, 5.3, 33.1, res.code)
         resp_code1, response3 = prom_code.get_ride_from_prom_code(11.5, 4.1, 5.3, 33.1, res3.code)
         resp_code2, response2 = prom_code.get_ride_from_prom_code(11.5, 4.1, 5.3, 33.1, res3.code + "1")
+
+        credit = res3.credit
+
         resp_code3, response3 = prom_code.get_ride_from_prom_code(1.5, 1.3, 5.3, 33.1, res3.code)
+
+        assert credit == res3.credit + mock_value
 
         assert resp_code == RideFromPromCodeResult.PromCodeInactive
         assert resp_code1 == RideFromPromCodeResult.PromCodeInvalid
