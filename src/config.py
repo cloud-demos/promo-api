@@ -42,7 +42,6 @@ else:
 PROJECT_ID = 'safeboda-213615'
 
 DEFAULT_CREDIT = 100.0
-DEFAULT_RADIUS = 50.0
 CODE_LENGTH = 12
 
 Expiration_time_Years = 0

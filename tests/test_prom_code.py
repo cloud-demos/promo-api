@@ -11,6 +11,7 @@ sys.path.append(app_dir)
 import tconfig
 
 from domain import models
+from domain.models import Event, PromCode, db
 from domain import prom_code
 
 from domain.prom_code import GeneratePromoCodeResult, DeactivatePromoCodeResult
@@ -35,6 +36,7 @@ def models_data():
                 "name": "Event 1",
                 "lat": 1.4,
                 "lng": 1.1,
+                "radius": 50.0,
             },
             "model": "Event"
         },
@@ -66,8 +68,9 @@ def test_promo_code_generation(models_data, mocker):
         assert response_code == GeneratePromoCodeResult.EventDoNotExists
 
         response_code, res = prom_code.generate_promo_code(1)
+        event = Event.query.get(1)
         assert res.credit == tconfig.DEFAULT_CREDIT
-        assert res.radius == tconfig.DEFAULT_RADIUS
+        assert res.radius == event.radius
         assert res.code == mock_code
         assert res.expiration_time == mock_time
 
@@ -161,3 +164,16 @@ def test_promo_code_lists(models_data, mocker):
 
         all_codes = prom_code.get_all_promo_codes(1)
         assert set([a.code for a in all_codes]) == set([res2.code, res3.code, res.code])
+
+
+def test_promo_code_valid_acording_distances(models_data):
+    """
+
+    """
+    app = create_app()
+
+    with app.app_context():
+        response_code, res = prom_code.generate_promo_code(1)
+        assert res.valid(1.5, 1.1)
+        assert not res.valid(1.5, 4.1)
+

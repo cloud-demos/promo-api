@@ -25,6 +25,7 @@ class Event(db.Model):
     lat = db.Column(db.Float)
     lng = db.Column(db.Float)
     name = db.Column(db.String(50))
+    radius = db.Column(db.Float)  # in miles
 
     prom_codes = db.relationship('PromCode', backref='event',
                                  lazy='dynamic')
@@ -32,7 +33,11 @@ class Event(db.Model):
     def __str__(self):
         return self.name
 
+
 import domain.utils as utils
+
+from geopy import distance
+
 
 class PromCode(db.Model):
     """Docs."""
@@ -58,6 +63,13 @@ class PromCode(db.Model):
     def deactivate(self):
         self.active = False
         db.session.commit()
+
+    def activate(self):
+        self.active = True
+        db.session.commit()
+
+    def valid(self, lat, lng):
+        return self.radius >= distance.distance((self.event.lat, self.event.lng), (lat, lng)).miles
 
 
 def create_database(config_file='../config.py'):

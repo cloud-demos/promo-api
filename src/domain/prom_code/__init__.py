@@ -17,7 +17,7 @@ def generate_promo_code(event_id, data={}):
     pcode = PromCode(
         event_id=event_id,
         credit=data.get("credit", config.DEFAULT_CREDIT),
-        radius=data.get("radius", config.DEFAULT_RADIUS),
+        radius=data.get("radius", event.radius),
         expiration_time=data.get("expiration_time", utils.get_default_expiration_time()),
         code=utils.string_generator(config.CODE_LENGTH),
     )
