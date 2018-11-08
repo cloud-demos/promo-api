@@ -14,12 +14,17 @@ def generate_promo_code(event_id, data={}):
     if not event:
         return GeneratePromoCodeResult.EventDoNotExists, None
 
+    pcode = True
+    while pcode:
+        code = utils.string_generator(config.CODE_LENGTH)
+        pcode = db.session.query(PromCode).filter(PromCode.code == code).first()
+
     pcode = PromCode(
         event_id=event_id,
         credit=data.get("credit", config.DEFAULT_CREDIT),
         radius=data.get("radius", event.radius),
         expiration_time=data.get("expiration_time", utils.get_default_expiration_time()),
-        code=utils.string_generator(config.CODE_LENGTH),
+        code=code,
     )
 
     db.session.add(pcode)
