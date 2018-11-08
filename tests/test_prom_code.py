@@ -14,7 +14,10 @@ from domain import models
 from domain.models import Event, PromCode, db
 from domain import prom_code
 
-from domain.prom_code import GeneratePromoCodeResult, DeactivatePromoCodeResult
+from domain.prom_code import GeneratePromoCodeResult, \
+    DeactivatePromoCodeResult, \
+    RideFromPromCodeResult
+
 import domain
 
 
@@ -208,3 +211,24 @@ def test_promo_code_valid_acording_distances_radius_changed_using_event(models_d
         assert res2.is_valid(1.5, 4.1)
         assert res3.is_valid(1.5, 4.1)
 
+
+def test_ride_from_prom_code(models_data):
+    """
+
+    """
+    app = create_app()
+
+    with app.app_context():
+        response_code, res = prom_code.generate_promo_code(1)
+        prom_code.deactivate_promo_code(res.code)
+        response_code, res3 = prom_code.generate_promo_code(1)
+
+        resp_code, response = prom_code.get_ride_from_prom_code(1.5, 4.1, 5.3, 33.1, res.code)
+        resp_code1, response3 = prom_code.get_ride_from_prom_code(11.5, 4.1, 5.3, 33.1, res3.code)
+        resp_code2, response2 = prom_code.get_ride_from_prom_code(11.5, 4.1, 5.3, 33.1, res3.code + "1")
+        resp_code3, response3 = prom_code.get_ride_from_prom_code(1.5, 1.3, 5.3, 33.1, res3.code)
+
+        assert resp_code == RideFromPromCodeResult.PromCodeInactive
+        assert resp_code1 == RideFromPromCodeResult.PromCodeInvalid
+        assert resp_code2 == RideFromPromCodeResult.PromCodeDoNotExists
+        assert resp_code3 == RideFromPromCodeResult.Ok
