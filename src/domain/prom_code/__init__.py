@@ -56,3 +56,37 @@ def get_active_promo_codes(event_id):
     # todo: add pagination
     return db.session.query(PromCode).filter(
         and_(PromCode.active, PromCode.event_id == event_id))
+
+
+SetRadiusFromEventsResult = Enum('SetRadiusFromEventsResult', 'EventDoNotExists Ok')
+
+
+def set_radius_to_event(event_id, radius):
+    event = Event.query.get(event_id)
+    if event:
+        event.set_radius(radius)
+        return SetRadiusFromEventsResult.Ok, event
+    else:
+        return SetRadiusFromEventsResult.EventDoNotExists, None
+
+
+def spread_radius_from_event_to_all_prom_codes(event_id):
+    event = Event.query.get(event_id)
+    if event:
+        for pcode in event.prom_codes:
+            pcode.set_radius(event.radius)
+        return SetRadiusResult.Ok, event
+    else:
+        return SetRadiusResult.EventDoNotExists, None
+
+
+SetRadiusResult = Enum('SetRadiusResult', 'PromCodeDoNotExists Ok')
+
+
+def set_radius_to_prom_code(code, radius):
+    pcode = db.session.query(PromCode).filter(PromCode.code == code).first()
+    if pcode:
+        pcode.set_radius(radius)
+        return SetRadiusResult.Ok, pcode
+    else:
+        return SetRadiusResult.PromCodeDoNotExists, None

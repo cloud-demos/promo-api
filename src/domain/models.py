@@ -33,6 +33,10 @@ class Event(db.Model):
     def __str__(self):
         return self.name
 
+    def set_radius(self, radius):
+        self.radius = radius
+        db.session.commit()
+
 
 import domain.utils as utils
 
@@ -68,8 +72,12 @@ class PromCode(db.Model):
         self.active = True
         db.session.commit()
 
-    def valid(self, lat, lng):
+    def is_valid(self, lat, lng):
         return self.radius >= distance.distance((self.event.lat, self.event.lng), (lat, lng)).miles
+
+    def set_radius(self, radius):
+        self.radius = radius
+        db.session.commit()
 
 
 def create_database(config_file='../config.py'):

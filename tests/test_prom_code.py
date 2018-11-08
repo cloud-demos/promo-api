@@ -174,6 +174,37 @@ def test_promo_code_valid_acording_distances(models_data):
 
     with app.app_context():
         response_code, res = prom_code.generate_promo_code(1)
-        assert res.valid(1.5, 1.1)
-        assert not res.valid(1.5, 4.1)
+        assert res.is_valid(1.5, 1.1)
+        assert not res.is_valid(1.5, 4.1)
+
+
+def test_promo_code_valid_acording_distances_radius_changed(models_data):
+    """
+
+    """
+    app = create_app()
+
+    with app.app_context():
+        response_code, res = prom_code.generate_promo_code(1)
+        prom_code.set_radius_to_prom_code(res.code, 5000)
+        assert res.is_valid(1.5, 4.1)
+
+
+def test_promo_code_valid_acording_distances_radius_changed_using_event(models_data, mocker):
+    """
+
+    """
+    app = create_app()
+
+    with app.app_context():
+        response_code, res = prom_code.generate_promo_code(1)
+        response_code, res2 = prom_code.generate_promo_code(1)
+        response_code, res3 = prom_code.generate_promo_code(1)
+
+        prom_code.set_radius_to_event(1, 5000)
+        prom_code.spread_radius_from_event_to_all_prom_codes(1)
+
+        assert res.is_valid(1.5, 4.1)
+        assert res2.is_valid(1.5, 4.1)
+        assert res3.is_valid(1.5, 4.1)
 
