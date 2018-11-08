@@ -90,3 +90,27 @@ def set_radius_to_prom_code(code, radius):
         return SetRadiusResult.Ok, pcode
     else:
         return SetRadiusResult.PromCodeDoNotExists, None
+
+
+RideFromPromCodeResult = Enum('RideFromPromCodeResult', 'PromCodeDoNotExists PromCodeInactive PromCodeInvalid Ok')
+
+import polyline
+
+
+def get_ride_from_prom_code(origin_lat, origin_lng, dest_lat, dest_lng, code):
+    pcode = db.session.query(PromCode).filter(PromCode.code == code).first()
+    if pcode:
+        if pcode.active:
+            origin_valid = pcode.is_valid(origin_lat, origin_lng)
+            dest_valid = pcode.is_valid(dest_lat, dest_lng)
+            if origin_valid or dest_valid:
+                return RideFromPromCodeResult.Ok, {
+                    "code": pcode,
+                    "polyline": polyline.encode([(origin_lat, origin_lng), (dest_lat, dest_lng)], 5),
+                }
+            else:
+                return RideFromPromCodeResult.PromCodeInvalid, None
+        else:
+            return RideFromPromCodeResult.PromCodeInactive, None
+    else:
+        return RideFromPromCodeResult.PromCodeDoNotExists, None
