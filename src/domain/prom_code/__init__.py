@@ -33,29 +33,39 @@ def generate_promo_code(event_id, data={}):
     return GeneratePromoCodeResult.Ok, pcode
 
 
-DeactivatePromoCodeResult = Enum('DeactivatePromoCodeResult', 'PromoCodeDoNotExists Ok')
+PromoCodeResult = Enum('PromoCodeResult', 'PromoCodeDoNotExists Ok')
 
 
 def deactivate_promo_code(code):
     pcode = db.session.query(PromCode).filter(PromCode.code == code).first()
     if not pcode:
-        return DeactivatePromoCodeResult.PromoCodeDoNotExists, None
+        return PromoCodeResult.PromoCodeDoNotExists, None
 
     pcode.deactivate()
 
-    return DeactivatePromoCodeResult.Ok, pcode
+    return PromoCodeResult.Ok, pcode
 
 
-def get_all_promo_codes(event_id):
-    # todo: add pagination
+def activate_promo_code(code):
+    pcode = db.session.query(PromCode).filter(PromCode.code == code).first()
+    if not pcode:
+        return PromoCodeResult.PromoCodeDoNotExists, None
+
+    pcode.activate()
+
+    return PromoCodeResult.Ok, pcode
+
+
+def get_all_promo_codes(event_id, page=1, page_length=50):
+    offset = (page - 1) * page_length
     return db.session.query(PromCode).filter(
-        PromCode.event_id == event_id)
+        PromCode.event_id == event_id).offset(offset).limit(page_length).all()
 
 
-def get_active_promo_codes(event_id):
-    # todo: add pagination
+def get_active_promo_codes(event_id, page=1, page_length=50):
+    offset = (page - 1) * page_length
     return db.session.query(PromCode).filter(
-        and_(PromCode.active, PromCode.event_id == event_id))
+        and_(PromCode.active, PromCode.event_id == event_id)).offset(offset).limit(page_length).all()
 
 
 SetRadiusFromEventsResult = Enum('SetRadiusFromEventsResult', 'EventDoNotExists Ok')
@@ -73,11 +83,12 @@ def set_radius_to_event(event_id, radius):
 def spread_radius_from_event_to_all_prom_codes(event_id):
     event = Event.query.get(event_id)
     if not event:
-        return SetRadiusResult.EventDoNotExists, None
+        return SetRadiusFromEventsResult.EventDoNotExists, None
 
     for pcode in event.prom_codes:
         pcode.set_radius(event.radius)
-    return SetRadiusResult.Ok, event
+
+    return SetRadiusFromEventsResult.Ok, event
 
 
 SetRadiusResult = Enum('SetRadiusResult', 'PromCodeDoNotExists Ok')
@@ -91,7 +102,7 @@ def set_radius_to_prom_code(code, radius):
     return SetRadiusResult.Ok, pcode
 
 
-RideFromPromCodeResult = Enum('RideFromPromCodeResult', 'PromCodeDoNotExists PromCodeInactive PromCodeInvalid Ok')
+RideFromPromCodeResult = Enum('RideFromPromCodeResult', 'PromCodeDoNotExists PromCodeInactive PromCodeInvalid InsuficientCredit Ok')
 
 import polyline
 from geopy import distance
@@ -117,6 +128,10 @@ def get_ride_from_prom_code(origin_lat, origin_lng, dest_lat, dest_lng, code):
         return RideFromPromCodeResult.PromCodeInvalid, None
 
     cost = calculate_value(origin_lat, origin_lng, dest_lat, dest_lng)
+
+    if pcode.credit < cost:
+        return RideFromPromCodeResult.InsuficientCredit, None
+
     pcode.decrement_credit(cost)
 
     return RideFromPromCodeResult.Ok, {

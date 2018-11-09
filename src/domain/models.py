@@ -48,7 +48,7 @@ class PromCode(db.Model):
 
     __tablename__ = 'prom_codes'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    credit = db.Column(db.Integer)
+    credit = db.Column(db.Float)
     code = db.Column(db.String(20), primary_key=True)
     radius = db.Column(db.Float)
     active = db.Column(db.Boolean, default=True)

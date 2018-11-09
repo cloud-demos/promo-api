@@ -15,7 +15,7 @@ from domain.models import Event, PromCode, db
 from domain import prom_code
 
 from domain.prom_code import GeneratePromoCodeResult, \
-    DeactivatePromoCodeResult, \
+    PromoCodeResult, \
     RideFromPromCodeResult
 
 import domain
@@ -144,7 +144,7 @@ def test_promo_code_deactivation(models_data, mocker):
         response_code, res = prom_code.deactivate_promo_code(mock_code)
         assert res.active == False
         response_code, res = prom_code.deactivate_promo_code(mock_code + mock_code)
-        assert response_code == DeactivatePromoCodeResult.PromoCodeDoNotExists
+        assert response_code == PromoCodeResult.PromoCodeDoNotExists
 
 
 def test_promo_code_lists(models_data, mocker):
