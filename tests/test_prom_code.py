@@ -56,7 +56,7 @@ def models_data():
     models.drop_database(os.path.join(curr_dir, 'tconfig.py'))
 
 
-def test_promo_code_generation(models_data, mocker, app):
+def test_promo_code_generation_default_values(models_data, mocker, app):
     """
     Generation of new promo codes for events
     """
@@ -78,6 +78,36 @@ def test_promo_code_generation(models_data, mocker, app):
         assert res.credit == tconfig.DEFAULT_CREDIT
         assert res.radius == event.radius
         assert res.code == mock_code
+        assert res.expiration_time == mock_time
+
+def test_promo_code_generation(models_data, mocker, app):
+    """
+    Generation of new promo codes for events
+    """
+
+    mock_code = "mock_code"
+    CREDIT = 23
+    radius = 99
+
+    template = "%m-%d-%Y"
+    mock_time = datetime.datetime.strptime("01-02-2018", template)
+
+    mocker.patch.object(domain.utils, 'string_generator', return_value=mock_code)
+
+    with app.app_context():
+        response_code, res = prom_code.generate_promo_code(10)
+        assert response_code == GeneratePromoCodeResult.EventDoNotExists
+        event_id = 1
+        response_code, res = prom_code.generate_promo_code(event_id, {
+            "credit": CREDIT,
+            "radius": radius,
+            "event_id": event_id,
+            "expiration_time": datetime.datetime.strftime(mock_time, template),
+        })
+        assert res.credit == CREDIT
+        assert res.radius == radius
+        assert res.code == mock_code
+        assert res.event_id == event_id
         assert res.expiration_time == mock_time
 
 
@@ -130,7 +160,7 @@ def test_promo_code_generation_default_expiration_time_length(models_data, mocke
         assert res.expiration_time < now_mock_time_plus_2_months
 
 
-def test_promo_code_deactivation(models_data, mocker, app):
+def test_promo_code_deactivation_activation(models_data, mocker, app):
     """
 
     """
@@ -141,9 +171,17 @@ def test_promo_code_deactivation(models_data, mocker, app):
     with app.app_context():
         response_code, res = prom_code.generate_promo_code(1)
         assert res.active == True
+
         response_code, res = prom_code.deactivate_promo_code(mock_code)
         assert res.active == False
+
+        response_code, res = prom_code.activate_promo_code(mock_code)
+        assert res.active == True
+
         response_code, res = prom_code.deactivate_promo_code(mock_code + mock_code)
+        assert response_code == PromoCodeResult.PromoCodeDoNotExists
+
+        response_code, res = prom_code.activate_promo_code(mock_code + mock_code)
         assert response_code == PromoCodeResult.PromoCodeDoNotExists
 
 
@@ -189,6 +227,15 @@ def test_valid_promo_code_acording_distances_when_radius_change(models_data, app
         prom_code.set_radius_to_prom_code(pcode.code, 5000)
         assert pcode.is_valid(1.5, 4.1)
 
+def test_radius_change(models_data, app):
+    """
+
+    """
+
+    with app.app_context():
+        response_code, pcode = prom_code.set_radius_to_prom_code("code", 3)
+        assert response_code == SetRadiusResult.PromCodeDoNotExists
+
 
 def test_promo_code_valid_acording_distances_radius_changed_using_event(models_data, mocker, app):
     """
@@ -201,7 +248,18 @@ def test_promo_code_valid_acording_distances_radius_changed_using_event(models_d
         response_code, pcode3 = prom_code.generate_promo_code(1)
 
         prom_code.set_radius_to_event(1, 5000)
+
+        response_code, pcode4 = prom_code.set_radius_to_event(11, 5000)
+
+        assert response_code == SetRadiusFromEventsResult.EventDoNotExists
+
         prom_code.spread_radius_from_event_to_all_prom_codes(1)
+
+        assert response_code == SetRadiusFromEventsResult.EventDoNotExists
+
+        response_code, pcode5 = prom_code.spread_radius_from_event_to_all_prom_codes(11)
+
+        assert response_code == SetRadiusFromEventsResult.EventDoNotExists
 
         assert pcode.is_valid(1.5, 4.1)
         assert pcode2.is_valid(1.5, 4.1)
@@ -229,12 +287,54 @@ def test_ride_from_prom_code(models_data, mocker, app):
 
         resp_code3, pcode4 = prom_code.get_ride_from_prom_code(1.5, 1.3, 5.3, 33.1, pcode2.code)
 
+        response_code, pcode5 = prom_code.generate_promo_code(1)
+        pcode5.decrement_credit(pcode5.credit - 1)
+        resp_code4, pcode5 = prom_code.get_ride_from_prom_code(1.5, 1.3, 44.3, 88.1, pcode5.code)
+
         assert credit == pcode2.credit + mock_value
 
         assert resp_code0 == RideFromPromCodeResult.PromCodeInactive
         assert resp_code1 == RideFromPromCodeResult.PromCodeInvalid
         assert resp_code2 == RideFromPromCodeResult.PromCodeDoNotExists
         assert resp_code3 == RideFromPromCodeResult.Ok
+        assert resp_code4 == RideFromPromCodeResult.InsuficientCredit
+
+
+def test_ride_from_prom_code_expired_error(models_data, mocker, app):
+    """
+
+    """
+
+    template = "%d-%m-%Y"
+    now_mock_time = datetime.datetime.strptime("08-02-2018", template)
+    default_expiration_time_mock_time = datetime.datetime.strptime("03-02-2018", template)
+    mocker.patch.object(domain.utils, 'get_now', return_value=now_mock_time)
+    mocker.patch.object(domain.utils, 'get_default_expiration_time', return_value=default_expiration_time_mock_time)
+
+    with app.app_context():
+        response_code, pcode = prom_code.generate_promo_code(1)
+        response_code2, pcode2 = prom_code.get_ride_from_prom_code(1.5, 4.1, 5.3, 33.1, pcode.code)
+        assert response_code2 == RideFromPromCodeResult.PromCodeExpired
+
+
+def test_prom_code_expired_error(models_data, mocker, app):
+    """
+
+    """
+
+    template = "%d-%m-%Y"
+    now_mock_time = datetime.datetime.strptime("08-02-2018", template)
+    default_expiration_time_mock_time = datetime.datetime.strptime("03-02-2018", template)
+    mocker.patch.object(domain.utils, 'get_now', return_value=now_mock_time)
+    mocker.patch.object(domain.utils, 'get_default_expiration_time', return_value=default_expiration_time_mock_time)
+
+    with app.app_context():
+        response_code, pcode = prom_code.generate_promo_code(1)
+        response_code2, result = prom_code.promo_code_is_expired(pcode.code)
+        response_code3, result2 = prom_code.promo_code_is_expired(pcode.code + pcode.code)
+        assert response_code2 == PromoCodeResult.Ok
+        assert result == True
+        assert response_code3 == PromoCodeResult.PromoCodeDoNotExists
 
 
 def test_flask_prom_code_generate_error(models_data, mocker, client, app):

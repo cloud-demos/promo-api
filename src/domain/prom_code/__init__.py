@@ -85,6 +85,7 @@ def set_radius_to_event(event_id, radius):
         return SetRadiusFromEventsResult.EventDoNotExists, None
 
     event.set_radius(radius)
+
     return SetRadiusFromEventsResult.Ok, event
 
 
@@ -106,7 +107,9 @@ def set_radius_to_prom_code(code, radius):
     pcode = db.session.query(PromCode).filter(PromCode.code == code).first()
     if not pcode:
         return SetRadiusResult.PromCodeDoNotExists, None
+
     pcode.set_radius(radius)
+
     return SetRadiusResult.Ok, pcode
 
 
