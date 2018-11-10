@@ -3,7 +3,8 @@ from flask_restplus import reqparse
 
 from . import api
 
-from domain.prom_code import GeneratePromoCodeResult, generate_promo_code
+from domain.prom_code import GeneratePromoCodeResult
+from domain import prom_code
 
 
 promoCodeCreationModelDict = {
@@ -26,12 +27,12 @@ def generate_promo_code_controller(event_id, data):
             lambda pcode: {'status': "ok",
                            "code": pcode.code},
     }
-    code, res = generate_promo_code(event_id, data)
+    code, res = prom_code.generate_promo_code(event_id, data)
     return relation[code](res)
 
 
 @api.route('/generate')
-class PromCodeGeneration(Resource):
+class PromCodeGenerate(Resource):
     """Docs."""
 
     @api.expect(PromoCodeCreationModel, validate=True)

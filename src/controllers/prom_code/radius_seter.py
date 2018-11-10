@@ -3,9 +3,8 @@ from flask_restplus import reqparse
 
 from . import api
 
-from domain.prom_code import SetRadiusFromEventsResult, set_radius_to_event
-from domain.prom_code import spread_radius_from_event_to_all_prom_codes
-from domain.prom_code import SetRadiusResult, set_radius_to_prom_code
+from domain.prom_code import SetRadiusFromEventsResult, SetRadiusResult
+from domain import prom_code
 
 setRadiusToEventModelDict = {
     'event_id': fields.Integer(required=True),
@@ -24,7 +23,7 @@ def set_radius_to_event_controller(event_id, radius):
             lambda event: {'status': "ok",
                            "code": event.name},
     }
-    code, res = set_radius_to_event(event_id, radius)
+    code, res = prom_code.set_radius_to_event(event_id, radius)
     return relation[code](res)
 
 
@@ -58,7 +57,7 @@ def spread_radius_in_event_controller(event_id):
             lambda event: {'status': "ok",
                            "code": event.name},
     }
-    code, res = spread_radius_from_event_to_all_prom_codes(event_id)
+    code, res = prom_code.spread_radius_from_event_to_all_prom_codes(event_id)
     return relation[code](res)
 
 
@@ -93,7 +92,7 @@ def set_radius_to_prom_code_controller(prom_code, radius):
             lambda pcode: {"status": "ok",
                            "code": pcode.code},
     }
-    code, res = set_radius_to_prom_code(prom_code, radius)
+    code, res = prom_code.set_radius_to_prom_code(prom_code, radius)
     return relation[code](res)
 
 

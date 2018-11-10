@@ -3,7 +3,8 @@ from flask_restplus import reqparse
 
 from . import api
 
-from domain.prom_code import PromoCodeResult, deactivate_promo_code, activate_promo_code
+from domain.prom_code import PromoCodeResult
+from domain import prom_code
 
 activation_parser = reqparse.RequestParser()
 activation_parser.add_argument('code', type=str, location='args', required=True)
@@ -19,7 +20,7 @@ def deactivate_promo_code_controller(code):
             lambda pcode: {'status': "ok",
                            "code": pcode.code},
     }
-    code, res = deactivate_promo_code(code)
+    code, res = prom_code.deactivate_promo_code(code)
     return relation[code](res)
 
 
@@ -44,7 +45,7 @@ def activate_promo_code_controller(code):
             lambda pcode: {'status': "ok",
                            "code": pcode.code},
     }
-    code, res = activate_promo_code(code)
+    code, res = prom_code.activate_promo_code(code)
     return relation[code](res)
 
 

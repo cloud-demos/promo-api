@@ -3,7 +3,8 @@ import datetime
 
 from . import api
 
-from domain.prom_code import RideFromPromCodeResult, get_ride_from_prom_code
+from domain.prom_code import RideFromPromCodeResult
+from domain import prom_code
 
 getRideFromPromoCodeModelDict = {
     'code': fields.String(required=True),
@@ -45,7 +46,7 @@ def get_ride_from_prom_code_controller(origin_lat, origin_lng, dest_lat, dest_ln
                           "polyline": data["polyline"]
                           },
     }
-    code, res = get_ride_from_prom_code(origin_lat, origin_lng, dest_lat, dest_lng, prom_code)
+    code, res = prom_code.get_ride_from_prom_code(origin_lat, origin_lng, dest_lat, dest_lng, prom_code)
     return relation[code](res)
 
 

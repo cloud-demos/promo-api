@@ -1,7 +1,7 @@
 from flask_restplus import Resource, fields
 from flask_restplus import reqparse
 
-from domain.prom_code import get_active_promo_codes, get_all_promo_codes
+from domain import prom_code
 from . import api
 
 getPromoCodeModelDict = {
@@ -30,7 +30,7 @@ class PromCodeActive(Resource):
         args = pagination_parser.parse_args()
         event_id = args["event_id"]
         page = args.get('page')
-        return get_active_promo_codes(event_id, page)
+        return prom_code.get_active_promo_codes(event_id, page)
 
 
 @api.route('/list')
@@ -43,4 +43,4 @@ class PromCodeList(Resource):
         args = pagination_parser.parse_args()
         event_id = args["event_id"]
         page = args.get('page')
-        return get_all_promo_codes(event_id, page)
+        return prom_code.get_all_promo_codes(event_id, page)
