@@ -1,13 +1,14 @@
 import string
 import random
 
-
 import dateutil.relativedelta
 import datetime
 import config
 
+
 def get_now():
     return datetime.datetime.now()
+
 
 def get_default_expiration_time():
     now = get_now()

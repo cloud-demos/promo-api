@@ -2,10 +2,13 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
-from flask import current_app
-import json
+from geopy import distance
 
+import domain.utils as utils
+
+import json
 import datetime
+import argparse
 
 builtin_list = list
 
@@ -35,11 +38,6 @@ class Event(db.Model):
         db.session.commit()
 
 
-import domain.utils as utils
-
-from geopy import distance
-
-
 class PromCode(db.Model):
     """Docs."""
 
@@ -49,7 +47,8 @@ class PromCode(db.Model):
     code = db.Column(db.String(20), primary_key=True)
     radius = db.Column(db.Float)
     active = db.Column(db.Boolean, default=True)
-    creation_time = db.Column(db.DateTime, nullable=False, default=datetime.datetime.now)
+    creation_time = db.Column(db.DateTime, nullable=False,
+                              default=datetime.datetime.now)
     expiration_time = db.Column(db.DateTime, nullable=False)
 
     event_id = db.Column(db.Integer, db.ForeignKey('events.id'), nullable=True)
@@ -67,7 +66,8 @@ class PromCode(db.Model):
         db.session.commit()
 
     def is_valid(self, lat, lng):
-        return self.radius >= distance.distance((self.event.lat, self.event.lng), (lat, lng)).miles
+        return self.radius >= distance.distance(
+            (self.event.lat, self.event.lng), (lat, lng)).miles
 
     def set_radius(self, radius):
         self.radius = radius
@@ -132,10 +132,12 @@ def init_database(config_file='../config.py'):
     temp_app = Flask(__name__)
     temp_app.config.from_pyfile(config_file)
 
-    init_datas = [json.loads(open('src/domain/fixtures/initial-data.json').read())]
+    init_datas = [json.loads(open('src/domain/fixtures/initial-data.json')
+                             .read())]
 
     if temp_app.config["LOCAL"]:
-        init_datas.append(json.loads(open('src/domain/fixtures/local-data.json').read()))
+        init_datas.append(json.loads(open(
+            'src/domain/fixtures/local-data.json').read()))
 
     init_database_common(temp_app, init_datas)
 
@@ -158,8 +160,6 @@ def init_database_common(temp_app, init_datas):
     print("Tables initialized")
 
 
-import argparse
-
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(
@@ -167,7 +167,8 @@ if __name__ == '__main__':
 
     parser.add_argument(
         '-a', '--action', type=str, default='init',
-        help='Options: init (fill tables whit initial data, the default), d (delete)')
+        help='Options: init (fill tables whit initial data, the default), '
+             'd (delete)')
 
     args = parser.parse_args()
 

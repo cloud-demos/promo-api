@@ -14,10 +14,12 @@ getRideFromPromoCodeModelDict = {
     'dest_lng': fields.Float(required=True),
 }
 
-GetRideFromPromoCodeModel = api.model('GetRideFromPromoCodeModel', getRideFromPromoCodeModelDict)
+GetRideFromPromoCodeModel = api.model('GetRideFromPromoCodeModel',
+                                      getRideFromPromoCodeModelDict)
 
 
-def get_ride_from_prom_code_controller(origin_lat, origin_lng, dest_lat, dest_lng, code):
+def get_ride_from_prom_code_controller(
+        origin_lat, origin_lng, dest_lat, dest_lng, code):
     """Docs."""
     template = "%Y-%m-%d"
     relation = {
@@ -31,11 +33,13 @@ def get_ride_from_prom_code_controller(origin_lat, origin_lng, dest_lat, dest_ln
 
         RideFromPromCodeResult.PromCodeInvalid:
             lambda _: {"status": "error",
-                       "reason": "The origin and the destination are to far from the event"},
+                       "reason": "The origin and the destination are to far "
+                                 "from the event"},
 
         RideFromPromCodeResult.InsuficientCredit:
             lambda _: {"status": "error",
-                       "reason": "The code's credit is insuficient for that ride"},
+                       "reason": "The code's credit is insuficient for "
+                                 "that ride"},
 
         RideFromPromCodeResult.PromCodeExpired:
             lambda _: {"status": "error",
@@ -52,7 +56,8 @@ def get_ride_from_prom_code_controller(origin_lat, origin_lng, dest_lat, dest_ln
                           },
     }
 
-    response_code, res = prom_code.get_ride_from_prom_code(origin_lat, origin_lng, dest_lat, dest_lng, code)
+    response_code, res = prom_code.get_ride_from_prom_code(
+        origin_lat, origin_lng, dest_lat, dest_lng, code)
     return relation[response_code](res)
 
 
@@ -69,4 +74,5 @@ class GetRideFromPromCode(Resource):
         origin_lng = data["origin_lng"]
         dest_lat = data["dest_lat"]
         dest_lng = data["dest_lng"]
-        return get_ride_from_prom_code_controller(origin_lat, origin_lng, dest_lat, dest_lng, code)
+        return get_ride_from_prom_code_controller(
+            origin_lat, origin_lng, dest_lat, dest_lng, code)

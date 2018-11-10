@@ -1,5 +1,4 @@
 from flask_restplus import Resource, fields
-from flask_restplus import reqparse
 
 from . import api
 
@@ -13,7 +12,8 @@ promoCodeCreationModelDict = {
     'credit': fields.Float(required=False),
     'expiration_time': fields.DateTime(required=False, dt_format='rfc822'),
 }
-PromoCodeCreationModel = api.model('PromoCodeCreationModel', promoCodeCreationModelDict)
+PromoCodeCreationModel = api.model('PromoCodeCreationModel',
+                                   promoCodeCreationModelDict)
 
 
 

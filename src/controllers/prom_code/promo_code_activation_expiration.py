@@ -1,4 +1,4 @@
-from flask_restplus import Resource, fields
+from flask_restplus import Resource
 from flask_restplus import reqparse
 
 from . import api
@@ -7,7 +7,8 @@ from domain.prom_code import PromoCodeResult
 from domain import prom_code
 
 activation_parser = reqparse.RequestParser()
-activation_parser.add_argument('code', type=str, location='args', required=True)
+activation_parser.add_argument('code', type=str, location='args',
+                               required=True)
 
 
 def deactivate_promo_code_controller(code):
@@ -68,10 +69,11 @@ def promo_code_is_expired_controller(code):
                        "reason": "The code do not exists"},
         PromoCodeResult.Ok:
             lambda result: {'status': "ok",
-                           "expired": result},
+                            "expired": result},
     }
     code, res = prom_code.promo_code_is_expired(code)
     return relation[code](res)
+
 
 @api.route('/expired')
 class PromCodeExpired(Resource):

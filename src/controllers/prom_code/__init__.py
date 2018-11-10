@@ -10,4 +10,3 @@ from . import generate_promo
 from . import promo_code_activation_expiration
 from . import radius_seter
 from . import get_ride_from_code
-

@@ -1,5 +1,4 @@
 from flask_restplus import Resource, fields
-from flask_restplus import reqparse
 
 from . import api
 
@@ -10,7 +9,8 @@ setRadiusToEventModelDict = {
     'event_id': fields.Integer(required=True),
     'radius': fields.Float(required=True),
 }
-SetRadiusToEventModel = api.model('SetRadiusToEventModel', setRadiusToEventModelDict)
+SetRadiusToEventModel = api.model('SetRadiusToEventModel',
+                                  setRadiusToEventModelDict)
 
 
 def set_radius_to_event_controller(event_id, radius):
@@ -40,11 +40,11 @@ class SetRadiusToEvent(Resource):
         return set_radius_to_event_controller(event_id, radius)
 
 
-
 spreadRadiusInEventModelDict = {
     'event_id': fields.Integer(required=True),
 }
-SpreadRadiusInEventModel = api.model('SpreadRadiusInEventModel', spreadRadiusInEventModelDict)
+SpreadRadiusInEventModel = api.model('SpreadRadiusInEventModel',
+                                     spreadRadiusInEventModelDict)
 
 
 def spread_radius_in_event_controller(event_id):
@@ -73,13 +73,12 @@ class SpreadRadiusInEvent(Resource):
         return spread_radius_in_event_controller(event_id)
 
 
-
-
 setRadiusToPromCodeModelDict = {
     'code': fields.String(required=True),
     'radius': fields.Float(required=True),
 }
-SetRadiusToPromCodeModel = api.model('SetRadiusToPromCodeModel', setRadiusToPromCodeModelDict)
+SetRadiusToPromCodeModel = api.model('SetRadiusToPromCodeModel',
+                                     setRadiusToPromCodeModelDict)
 
 
 def set_radius_to_prom_code_controller(code, radius):
@@ -107,5 +106,3 @@ class SetRadiusToPromCode(Resource):
         code = data["code"]
         radius = data["radius"]
         return set_radius_to_prom_code_controller(code, radius)
-
-

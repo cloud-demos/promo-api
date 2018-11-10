@@ -1,12 +1,16 @@
 from enum import Enum
 
+from sqlalchemy import and_
+
+import polyline
+from geopy import distance
+
 import config
 from domain.models import PromCode, Event, db
 from domain import utils
 
-from sqlalchemy import and_
-
-GeneratePromoCodeResult = Enum('GeneratePromoCodeResult', 'EventDoNotExists Ok')
+GeneratePromoCodeResult = Enum('GeneratePromoCodeResult',
+                               'EventDoNotExists Ok')
 
 
 def generate_promo_code(event_id, data={}):
@@ -17,13 +21,15 @@ def generate_promo_code(event_id, data={}):
     pcode = True
     while pcode:
         code = utils.string_generator(config.CODE_LENGTH)
-        pcode = db.session.query(PromCode).filter(PromCode.code == code).first()
+        pcode = db.session.query(PromCode).filter(PromCode.code == code) \
+            .first()
 
     pcode = PromCode(
         event_id=event_id,
         credit=data.get("credit", config.DEFAULT_CREDIT),
         radius=data.get("radius", event.radius),
-        expiration_time=data.get("expiration_time", utils.get_default_expiration_time()),
+        expiration_time=data.get("expiration_time",
+                                 utils.get_default_expiration_time()),
         code=code,
     )
 
@@ -73,10 +79,12 @@ def get_all_promo_codes(event_id, page=1, page_length=50):
 def get_active_promo_codes(event_id, page=1, page_length=50):
     offset = (page - 1) * page_length
     return db.session.query(PromCode).filter(
-        and_(PromCode.active, PromCode.event_id == event_id)).offset(offset).limit(page_length).all()
+        and_(PromCode.active, PromCode.event_id == event_id)) \
+        .offset(offset).limit(page_length).all()
 
 
-SetRadiusFromEventsResult = Enum('SetRadiusFromEventsResult', 'EventDoNotExists Ok')
+SetRadiusFromEventsResult = Enum('SetRadiusFromEventsResult',
+                                 'EventDoNotExists Ok')
 
 
 def set_radius_to_event(event_id, radius):
@@ -118,12 +126,10 @@ RideFromPromCodeResult = Enum('RideFromPromCodeResult',
                               'PromCodeInactive PromCodeInvalid '
                               'InsuficientCredit PromCodeExpired Ok')
 
-import polyline
-from geopy import distance
-
 
 def calculate_value(origin_lat, origin_lng, dest_lat, dest_lng):
-    dist = distance.distance((origin_lat, origin_lng), (dest_lat, dest_lng)).miles
+    dist = distance.distance(
+        (origin_lat, origin_lng), (dest_lat, dest_lng)).miles
     return dist * config.MILES_COST
 
 
@@ -153,5 +159,6 @@ def get_ride_from_prom_code(origin_lat, origin_lng, dest_lat, dest_lng, code):
 
     return RideFromPromCodeResult.Ok, {
         "code": pcode,
-        "polyline": polyline.encode([(origin_lat, origin_lng), (dest_lat, dest_lng)], 5),
+        "polyline": polyline.encode(
+            [(origin_lat, origin_lng), (dest_lat, dest_lng)], 5),
     }

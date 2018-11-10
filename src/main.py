@@ -23,7 +23,7 @@ def create_app(config_file=config):
     with main_app.app_context():
         models.init_app(main_app)
 
-    cors = CORS(main_app, resources={r"/api/*": {"origins": "*"}})
+    CORS(main_app, resources={r"/api/*": {"origins": "*"}})
 
     return main_app
 

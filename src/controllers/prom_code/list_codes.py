@@ -16,8 +16,10 @@ getPromoCodeModelDict = {
 GetPromoCodeModel = api.model('GetPromoCodeModel', getPromoCodeModelDict)
 
 pagination_parser = reqparse.RequestParser()
-pagination_parser.add_argument('event_id', type=int, location='args', required=True)
-pagination_parser.add_argument('page', type=int, location='args', required=False, default=1)
+pagination_parser.add_argument('event_id', type=int, location='args',
+                               required=True)
+pagination_parser.add_argument('page', type=int, location='args',
+                               required=False, default=1)
 
 
 @api.route('/list-active')
