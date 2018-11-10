@@ -21,7 +21,7 @@ pagination_parser.add_argument('page', type=int, location='args', required=False
 
 
 @api.route('/list-active')
-class PromCodeActive(Resource):
+class PromCodeActiveList(Resource):
     """Docs."""
 
     @api.marshal_with(GetPromoCodeModel, code=200, skip_none=True)

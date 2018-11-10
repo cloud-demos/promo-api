@@ -58,3 +58,27 @@ class PromCodeActivation(Resource):
         args = activation_parser.parse_args()
         code = args['code']
         return activate_promo_code_controller(code)
+
+
+def promo_code_is_expired_controller(code):
+    """Docs."""
+    relation = {
+        PromoCodeResult.PromoCodeDoNotExists:
+            lambda _: {"status": "error",
+                       "reason": "The code do not exists"},
+        PromoCodeResult.Ok:
+            lambda result: {'status': "ok",
+                           "expired": result},
+    }
+    code, res = prom_code.promo_code_is_expired(code)
+    return relation[code](res)
+
+@api.route('/expired')
+class PromCodeExpired(Resource):
+    """Docs."""
+
+    def get(self):
+        """Docs."""
+        args = activation_parser.parse_args()
+        code = args['code']
+        return promo_code_is_expired_controller(code)

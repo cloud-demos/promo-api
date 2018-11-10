@@ -234,3 +234,126 @@ def test_ride_from_prom_code(models_data, mocker, app):
         assert resp_code2 == RideFromPromCodeResult.PromCodeDoNotExists
         assert resp_code3 == RideFromPromCodeResult.Ok
 
+
+def test_flask_prom_code_generate_error(models_data, mocker, client, app):
+    mock_response = GeneratePromoCodeResult.EventDoNotExists, None
+    mocker.patch.object(domain.prom_code, 'generate_promo_code', return_value=mock_response)
+
+    with app.app_context():
+        res = client.post(url_for('codes.prom_code_generate'),
+                          json={
+                              "expiration_time": "02-01-2018",
+                              "event_id": 1,
+                          })
+        assert res.json["status"] == "error"
+
+
+def test_flask_prom_code_generate_ok(models_data, mocker, client, app):
+    PromoCodeResultTuple = namedtuple('PromoCodeResultTuple', 'code')
+    mock_code = "mock_code"
+    mock_response = GeneratePromoCodeResult.Ok, PromoCodeResultTuple(mock_code)
+    mocker.patch.object(domain.prom_code, 'generate_promo_code', return_value=mock_response)
+
+    with app.app_context():
+        res = client.post(url_for('codes.prom_code_generate'),
+                          json={
+                              "expiration_time": "02-01-2018",
+                              "event_id": 1,
+                          })
+        assert res.json["code"] == mock_code
+
+
+def test_flask_prom_code_generate_400_error(models_data, mocker, client, app):
+    with app.app_context():
+        res = client.post(url_for('codes.prom_code_generate'),
+                          json={
+                              "expiration_time": "02-01-2018",
+                          })
+        assert res.status_code == 400
+
+
+def test_flask_is_expired_promo_code_error(models_data, mocker, client, app):
+    mock_response = PromoCodeResult.PromoCodeDoNotExists, None
+    mocker.patch.object(domain.prom_code, 'promo_code_is_expired', return_value=mock_response)
+
+    with app.app_context():
+        res = client.get(f"{url_for('codes.prom_code_expired')}?code=mock_code")
+
+        assert res.json["status"] == "error"
+
+def test_flask_is_expired_promo_code_ok(models_data, mocker, client, app):
+    mock_response = PromoCodeResult.Ok, True
+    mocker.patch.object(domain.prom_code, 'promo_code_is_expired', return_value=mock_response)
+
+    with app.app_context():
+        res = client.get(f"{url_for('codes.prom_code_expired')}?code=mock_code")
+
+        assert res.json["status"] == "ok"
+        assert res.json["expired"] == True
+
+def test_flask_promo_code_list(models_data, mocker, client, app):
+    mock_response = [1, 2]
+    mocker.patch.object(domain.prom_code, 'get_all_promo_codes', return_value=mock_response)
+
+    with app.app_context():
+        res = client.get(f"{url_for('codes.prom_code_list')}?page=2")
+
+        assert len(res.json) == 2
+
+def test_flask_promo_code_list_active(models_data, mocker, client, app):
+    mock_response = [1, 2]
+    mocker.patch.object(domain.prom_code, 'get_active_promo_codes', return_value=mock_response)
+
+    with app.app_context():
+        res = client.get(f"{url_for('codes.prom_code_active_list')}?page=2")
+
+        assert len(res.json) == 2
+
+
+def test_flask_promo_code_activate_error(models_data, mocker, client, app):
+    mock_response = PromoCodeResult.PromoCodeDoNotExists, None
+    mocker.patch.object(domain.prom_code, 'activate_promo_code', return_value=mock_response)
+
+    with app.app_context():
+        res = client.put(f"{url_for('codes.prom_code_activation')}?code=mock_code")
+
+        assert res.json["status"] == "error"
+
+
+def test_flask_promo_code_activate_400_error(models_data, mocker, client, app):
+    with app.app_context():
+        res = client.put(url_for('codes.prom_code_activation'))
+        assert res.status_code == 400
+
+
+def test_flask_promo_code_activate_ok(models_data, mocker, client, app):
+    PromoCodeResultTuple = namedtuple('PromoCodeResultTuple', 'code')
+    mock_code = "mock_code"
+    mock_response = PromoCodeResult.Ok, PromoCodeResultTuple(mock_code)
+    mocker.patch.object(domain.prom_code, 'activate_promo_code', return_value=mock_response)
+
+    with app.app_context():
+        res = client.put(f"{url_for('codes.prom_code_activation')}?code=mock_code")
+        assert res.json["code"] == mock_code
+
+
+def test_flask_promo_code_deactivate_error(models_data, mocker, client, app):
+    mock_response = PromoCodeResult.PromoCodeDoNotExists, None
+    mocker.patch.object(domain.prom_code, 'deactivate_promo_code', return_value=mock_response)
+
+    with app.app_context():
+        res = client.put(f"{url_for('codes.prom_code_deactivation')}?code=mock_code")
+
+        assert res.json["status"] == "error"
+
+
+def test_flask_promo_code_deactivate_ok(models_data, mocker, client, app):
+    PromoCodeResultTuple = namedtuple('PromoCodeResultTuple', 'code')
+    mock_code = "mock_code"
+    mock_response = PromoCodeResult.Ok, PromoCodeResultTuple(mock_code)
+    mocker.patch.object(domain.prom_code, 'deactivate_promo_code', return_value=mock_response)
+
+    with app.app_context():
+        res = client.put(f"{url_for('codes.prom_code_deactivation')}?code=mock_code")
+        assert res.json["code"] == mock_code
+

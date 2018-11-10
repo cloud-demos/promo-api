@@ -36,6 +36,14 @@ def generate_promo_code(event_id, data={}):
 PromoCodeResult = Enum('PromoCodeResult', 'PromoCodeDoNotExists Ok')
 
 
+def promo_code_is_expired(code):
+    pcode = db.session.query(PromCode).filter(PromCode.code == code).first()
+    if not pcode:
+        return PromoCodeResult.PromoCodeDoNotExists, None
+
+    return PromoCodeResult.Ok, pcode.expired()
+
+
 def deactivate_promo_code(code):
     pcode = db.session.query(PromCode).filter(PromCode.code == code).first()
     if not pcode:
@@ -102,7 +110,10 @@ def set_radius_to_prom_code(code, radius):
     return SetRadiusResult.Ok, pcode
 
 
-RideFromPromCodeResult = Enum('RideFromPromCodeResult', 'PromCodeDoNotExists PromCodeInactive PromCodeInvalid InsuficientCredit Ok')
+RideFromPromCodeResult = Enum('RideFromPromCodeResult',
+                              'PromCodeDoNotExists '
+                              'PromCodeInactive PromCodeInvalid '
+                              'InsuficientCredit PromCodeExpired Ok')
 
 import polyline
 from geopy import distance
@@ -120,6 +131,9 @@ def get_ride_from_prom_code(origin_lat, origin_lng, dest_lat, dest_lng, code):
 
     if not pcode.active:
         return RideFromPromCodeResult.PromCodeInactive, None
+
+    if pcode.expired():
+        return RideFromPromCodeResult.PromCodeExpired, None
 
     origin_valid = pcode.is_valid(origin_lat, origin_lng)
     dest_valid = pcode.is_valid(dest_lat, dest_lng)
