@@ -21,7 +21,7 @@ def set_radius_to_event_controller(event_id, radius):
                        "reason": "The event do not exists"},
         SetRadiusFromEventsResult.Ok:
             lambda event: {'status': "ok",
-                           "code": event.name},
+                           "event_name": event.name},
     }
     code, res = prom_code.set_radius_to_event(event_id, radius)
     return relation[code](res)
@@ -55,7 +55,7 @@ def spread_radius_in_event_controller(event_id):
                        "reason": "The event do not exists"},
         SetRadiusFromEventsResult.Ok:
             lambda event: {'status': "ok",
-                           "code": event.name},
+                           "event_name": event.name},
     }
     code, res = prom_code.spread_radius_from_event_to_all_prom_codes(event_id)
     return relation[code](res)
@@ -82,7 +82,7 @@ setRadiusToPromCodeModelDict = {
 SetRadiusToPromCodeModel = api.model('SetRadiusToPromCodeModel', setRadiusToPromCodeModelDict)
 
 
-def set_radius_to_prom_code_controller(prom_code, radius):
+def set_radius_to_prom_code_controller(code, radius):
     """Docs."""
     relation = {
         SetRadiusResult.PromCodeDoNotExists:
@@ -92,12 +92,12 @@ def set_radius_to_prom_code_controller(prom_code, radius):
             lambda pcode: {"status": "ok",
                            "code": pcode.code},
     }
-    code, res = prom_code.set_radius_to_prom_code(prom_code, radius)
-    return relation[code](res)
+    code_result, res = prom_code.set_radius_to_prom_code(code, radius)
+    return relation[code_result](res)
 
 
 @api.route('/set-radius-to-prom-code')
-class SetRadiusToEvent(Resource):
+class SetRadiusToPromCode(Resource):
     """Docs."""
 
     @api.expect(SetRadiusToPromCodeModel, validate=True)

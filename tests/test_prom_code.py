@@ -17,7 +17,9 @@ from domain.models import Event, PromCode, db
 from domain import prom_code
 
 from domain.prom_code import GeneratePromoCodeResult, \
-    PromoCodeResult, RideFromPromCodeResult, GeneratePromoCodeResult
+    PromoCodeResult, RideFromPromCodeResult, GeneratePromoCodeResult, \
+    SetRadiusFromEventsResult, SetRadiusFromEventsResult, \
+    SetRadiusResult, RideFromPromCodeResult
 
 import domain
 
@@ -281,6 +283,7 @@ def test_flask_is_expired_promo_code_error(models_data, mocker, client, app):
 
         assert res.json["status"] == "error"
 
+
 def test_flask_is_expired_promo_code_ok(models_data, mocker, client, app):
     mock_response = PromoCodeResult.Ok, True
     mocker.patch.object(domain.prom_code, 'promo_code_is_expired', return_value=mock_response)
@@ -291,23 +294,25 @@ def test_flask_is_expired_promo_code_ok(models_data, mocker, client, app):
         assert res.json["status"] == "ok"
         assert res.json["expired"] == True
 
+
 def test_flask_promo_code_list(models_data, mocker, client, app):
-    mock_response = [1, 2]
+    mock_response = [1, 2, 4, 1]
     mocker.patch.object(domain.prom_code, 'get_all_promo_codes', return_value=mock_response)
 
     with app.app_context():
-        res = client.get(f"{url_for('codes.prom_code_list')}?page=2")
+        res = client.get(f"{url_for('codes.prom_code_list')}?page=2&event_id=1")
 
-        assert len(res.json) == 2
+        assert len(res.json) == 4
+
 
 def test_flask_promo_code_list_active(models_data, mocker, client, app):
-    mock_response = [1, 2]
+    mock_response = [1, 2, 4, 1]
     mocker.patch.object(domain.prom_code, 'get_active_promo_codes', return_value=mock_response)
 
     with app.app_context():
-        res = client.get(f"{url_for('codes.prom_code_active_list')}?page=2")
+        res = client.get(f"{url_for('codes.prom_code_active_list')}?page=2&event_id=1")
 
-        assert len(res.json) == 2
+        assert len(res.json) == 4
 
 
 def test_flask_promo_code_activate_error(models_data, mocker, client, app):
@@ -357,3 +362,191 @@ def test_flask_promo_code_deactivate_ok(models_data, mocker, client, app):
         res = client.put(f"{url_for('codes.prom_code_deactivation')}?code=mock_code")
         assert res.json["code"] == mock_code
 
+
+def test_flask_set_radius_to_event_error(models_data, mocker, client, app):
+    mock_response = SetRadiusFromEventsResult.EventDoNotExists, None
+    mocker.patch.object(domain.prom_code, 'set_radius_to_event', return_value=mock_response)
+
+    with app.app_context():
+        res = client.post(url_for('codes.set_radius_to_event'),
+                          json={
+                              "radius": 12.8,
+                              "event_id": 1,
+                          })
+
+        assert res.json["status"] == "error"
+
+
+def test_flask_set_radius_to_event_error_400(models_data, mocker, client, app):
+    """
+    When a required field is missing the framework returns a 400 error
+    """
+    with app.app_context():
+        res = client.post(url_for('codes.set_radius_to_event'),
+                          json={
+                              "event_id": 1,
+                          })
+        assert res.status_code == 400
+
+
+def test_flask_set_radius_to_event_ok(models_data, mocker, client, app):
+    EventResultTuple = namedtuple('EventResultTuple', 'name')
+    mock_name = "mock_name"
+    mock_response = SetRadiusFromEventsResult.Ok, EventResultTuple(mock_name)
+    mocker.patch.object(domain.prom_code, 'set_radius_to_event', return_value=mock_response)
+
+    with app.app_context():
+        res = client.post(url_for('codes.set_radius_to_event'),
+                          json={
+                              "radius": 12.8,
+                              "event_id": 1,
+                          })
+        assert res.json["event_name"] == mock_name
+
+
+def test_flask_spread_radius_from_event_to_all_prom_codes_error(models_data, mocker, client, app):
+    mock_response = SetRadiusFromEventsResult.EventDoNotExists, None
+    mocker.patch.object(domain.prom_code, 'spread_radius_from_event_to_all_prom_codes', return_value=mock_response)
+
+    with app.app_context():
+        res = client.post(url_for('codes.spread_radius_in_event'),
+                          json={
+                              "event_id": 1,
+                          })
+
+        assert res.json["status"] == "error"
+
+
+def test_flask_spread_radius_from_event_to_all_prom_codes_ok(models_data, mocker, client, app):
+    EventResultTuple = namedtuple('EventResultTuple', 'name')
+    mock_name = "mock_name"
+    mock_response = SetRadiusFromEventsResult.Ok, EventResultTuple(mock_name)
+    mocker.patch.object(domain.prom_code, 'spread_radius_from_event_to_all_prom_codes', return_value=mock_response)
+
+    with app.app_context():
+        res = client.post(url_for('codes.spread_radius_in_event'),
+                          json={
+                              "event_id": 1,
+                          })
+
+        assert res.json["event_name"] == mock_name
+
+
+def test_flask_set_radius_to_prom_code_error(models_data, mocker, client, app):
+    mock_response = SetRadiusResult.PromCodeDoNotExists, None
+    mocker.patch.object(domain.prom_code, 'set_radius_to_prom_code', return_value=mock_response)
+
+    with app.app_context():
+        res = client.post(url_for('codes.set_radius_to_prom_code'),
+                          json={
+                              "code": "mock_code",
+                              "radius": 10.2,
+                          })
+
+        assert res.json["status"] == "error"
+
+
+def test_flask_set_radius_to_prom_code_ok(models_data, mocker, client, app):
+    PromoCodeResultTuple = namedtuple('PromoCodeResultTuple', 'code')
+    mock_code = "mock_code"
+    mock_response = SetRadiusResult.Ok, PromoCodeResultTuple(mock_code)
+    mocker.patch.object(domain.prom_code, 'set_radius_to_prom_code', return_value=mock_response)
+
+    with app.app_context():
+        res = client.post(url_for('codes.set_radius_to_prom_code'),
+                          json={
+                              "code": "code",
+                              "radius": 10.2,
+                          })
+
+        assert res.json["code"] == mock_code
+
+
+def get_ride_from_prom_code_error(models_data, mocker, client, app, mock_response_code):
+    mock_response = mock_response_code, None
+    mocker.patch.object(domain.prom_code, 'get_ride_from_prom_code', return_value=mock_response)
+
+    with app.app_context():
+        res = client.post(url_for('codes.get_ride_from_prom_code'),
+                          json={
+                              "code": "mock_code",
+                              "origin_lat": 10.2,
+                              "origin_lng": 10.2,
+                              "dest_lat": 10.2,
+                              "dest_lng": 10.2,
+                          })
+
+        assert res.json["status"] == "error"
+
+
+def test_flask_get_ride_from_prom_code_PromCodeDoNotExists_error(models_data, mocker, client, app):
+    get_ride_from_prom_code_error(models_data,
+                                  mocker,
+                                  client,
+                                  app,
+                                  RideFromPromCodeResult.PromCodeDoNotExists)
+
+
+def test_flask_get_ride_from_prom_code_PromCodeInactive_error(models_data, mocker, client, app):
+    get_ride_from_prom_code_error(models_data,
+                                  mocker,
+                                  client,
+                                  app,
+                                  RideFromPromCodeResult.PromCodeInactive)
+
+
+def test_flask_get_ride_from_prom_code_PromCodeInvalid_error(models_data, mocker, client, app):
+    get_ride_from_prom_code_error(models_data,
+                                  mocker,
+                                  client,
+                                  app,
+                                  RideFromPromCodeResult.PromCodeInvalid)
+
+
+def test_flask_get_ride_from_prom_code_InsuficientCredit_error(models_data, mocker, client, app):
+    get_ride_from_prom_code_error(models_data,
+                                  mocker,
+                                  client,
+                                  app,
+                                  RideFromPromCodeResult.InsuficientCredit)
+
+
+def test_flask_get_ride_from_prom_code_PromCodeExpired_error(models_data, mocker, client, app):
+    get_ride_from_prom_code_error(models_data,
+                                  mocker,
+                                  client,
+                                  app,
+                                  RideFromPromCodeResult.PromCodeExpired)
+
+
+def test_flask_get_ride_from_prom_code_ok(models_data, mocker, client, app):
+    RideFromPromCodeResultTuple = namedtuple('RideFromPromCodeResultTuple',
+                                             'code credit event_id '
+                                             'expiration_time ')
+    mock_code = "mock_code"
+    mock_credit = 34
+    mock_event_id = 3
+    template = "%d-%m-%Y"
+    mock_expiration_time = datetime.datetime.strptime("01-02-2018", template)
+    mock_response = RideFromPromCodeResult.Ok, {
+        "code": RideFromPromCodeResultTuple(
+            mock_code, mock_credit, mock_event_id,
+            mock_expiration_time
+        ),
+        "polyline": "polyline",
+    }
+    mocker.patch.object(domain.prom_code, 'get_ride_from_prom_code', return_value=mock_response)
+
+    with app.app_context():
+        res = client.post(url_for('codes.get_ride_from_prom_code'),
+                          json={
+                              "code": "mock_code",
+                              "origin_lat": 10.2,
+                              "origin_lng": 10.2,
+                              "dest_lat": 10.2,
+                              "dest_lng": 10.2,
+                          })
+
+        assert res.json["status"] == "ok"
+        assert res.json["code"] == mock_code
+        assert res.json["event_id"] == mock_event_id

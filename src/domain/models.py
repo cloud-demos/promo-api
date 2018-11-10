@@ -30,9 +30,6 @@ class Event(db.Model):
     prom_codes = db.relationship('PromCode', backref='event',
                                  lazy='dynamic')
 
-    def __str__(self):
-        return self.name
-
     def set_radius(self, radius):
         self.radius = radius
         db.session.commit()
@@ -56,9 +53,6 @@ class PromCode(db.Model):
     expiration_time = db.Column(db.DateTime, nullable=False)
 
     event_id = db.Column(db.Integer, db.ForeignKey('events.id'), nullable=True)
-
-    def __str__(self):
-        return self.code
 
     def expired(self):
         now = utils.get_now()

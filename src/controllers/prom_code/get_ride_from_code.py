@@ -17,7 +17,7 @@ getRideFromPromoCodeModelDict = {
 GetRideFromPromoCodeModel = api.model('GetRideFromPromoCodeModel', getRideFromPromoCodeModelDict)
 
 
-def get_ride_from_prom_code_controller(origin_lat, origin_lng, dest_lat, dest_lng, prom_code):
+def get_ride_from_prom_code_controller(origin_lat, origin_lng, dest_lat, dest_lng, code):
     """Docs."""
     template = "%Y-%m-%d"
     relation = {
@@ -37,21 +37,27 @@ def get_ride_from_prom_code_controller(origin_lat, origin_lng, dest_lat, dest_ln
             lambda _: {"status": "error",
                        "reason": "The code's credit is insuficient for that ride"},
 
+        RideFromPromCodeResult.PromCodeExpired:
+            lambda _: {"status": "error",
+                       "reason": "The code is expired"},
+
         RideFromPromCodeResult.Ok:
             lambda data: {"status": "ok",
                           "code": data["code"].code,
                           "remaining_credit": data["code"].credit,
                           "event_id": data["code"].event_id,
-                          "expiration_time": datetime.datetime.strftime(data["code"].expiration_time, template),
+                          "expiration_time": datetime.datetime.strftime(
+                              data["code"].expiration_time, template),
                           "polyline": data["polyline"]
                           },
     }
-    code, res = prom_code.get_ride_from_prom_code(origin_lat, origin_lng, dest_lat, dest_lng, prom_code)
-    return relation[code](res)
+
+    response_code, res = prom_code.get_ride_from_prom_code(origin_lat, origin_lng, dest_lat, dest_lng, code)
+    return relation[response_code](res)
 
 
 @api.route('/get-ride')
-class GetRideFromPromoCode(Resource):
+class GetRideFromPromCode(Resource):
     """Docs."""
 
     @api.expect(GetRideFromPromoCodeModel, validate=True)
