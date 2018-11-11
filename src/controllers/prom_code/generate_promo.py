@@ -1,10 +1,10 @@
 from flask_restplus import Resource, fields
+import logging
 
 from . import api
 
 from domain.prom_code import GeneratePromoCodeResult
 from domain import prom_code
-
 
 promoCodeCreationModelDict = {
     'event_id': fields.Integer(required=True),
@@ -14,7 +14,6 @@ promoCodeCreationModelDict = {
 }
 PromoCodeCreationModel = api.model('PromoCodeCreationModel',
                                    promoCodeCreationModelDict)
-
 
 
 def generate_promo_code_controller(event_id, data):
@@ -44,4 +43,6 @@ class PromCodeGenerate(Resource):
         data = api.payload
         event_id = data["event_id"]
         del data["event_id"]
+
+        logging.info(f"Promotional code generation for the {event_id} event")
         return generate_promo_code_controller(event_id, data)

@@ -1,5 +1,6 @@
 from flask_restplus import Resource
 from flask_restplus import reqparse
+import logging
 
 from . import api
 
@@ -37,6 +38,8 @@ class PromCodeDeactivation(Resource):
         """
         args = activation_parser.parse_args()
         code = args['code']
+
+        logging.info(f"Deactivation of the code {code}")
         return deactivate_promo_code_controller(code)
 
 
@@ -66,6 +69,8 @@ class PromCodeActivation(Resource):
         """
         args = activation_parser.parse_args()
         code = args['code']
+
+        logging.info(f"Activation of the code {code}")
         return activate_promo_code_controller(code)
 
 
@@ -94,4 +99,6 @@ class PromCodeExpired(Resource):
         """
         args = activation_parser.parse_args()
         code = args['code']
+
+        logging.info(f"Checking the expiration status of the code {code}")
         return promo_code_is_expired_controller(code)

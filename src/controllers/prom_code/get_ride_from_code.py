@@ -1,5 +1,6 @@
 from flask_restplus import Resource, fields
 import datetime
+import logging
 
 from . import api
 
@@ -65,7 +66,7 @@ class GetRideFromPromCode(Resource):
     """
         Get a ride using a promotional code.
 
-        Several constraints are apply
+        Several constraints are used
     """
 
     @api.expect(GetRideFromPromoCodeModel, validate=True)
@@ -73,7 +74,7 @@ class GetRideFromPromCode(Resource):
         """
             Get a ride using a promotional code
 
-            Several constraints are apply and can be response errors:
+            Several constraints are used and can be response errors:
                 . The event do not exists
                 . The Prom Code is Inactive
                 . The origin and the destination are to far from the event
@@ -89,5 +90,7 @@ class GetRideFromPromCode(Resource):
         origin_lng = data["origin_lng"]
         dest_lat = data["dest_lat"]
         dest_lng = data["dest_lng"]
+
+        logging.info(f"Geting a ride using the promotional code {code}")
         return get_ride_from_prom_code_controller(
             origin_lat, origin_lng, dest_lat, dest_lng, code)

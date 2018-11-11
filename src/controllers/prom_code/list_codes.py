@@ -1,5 +1,6 @@
 from flask_restplus import Resource, fields
 from flask_restplus import reqparse
+import logging
 
 from domain import prom_code
 from . import api
@@ -39,6 +40,8 @@ class PromCodeActiveList(Resource):
         args = pagination_parser.parse_args()
         event_id = args["event_id"]
         page = args.get('page')
+
+        logging.info(f"Geting the active codes of event {event_id}, page {page}")
         return prom_code.get_active_promo_codes(event_id, page)
 
 
@@ -59,4 +62,6 @@ class PromCodeList(Resource):
         args = pagination_parser.parse_args()
         event_id = args["event_id"]
         page = args.get('page')
+
+        logging.info(f"Geting all the codes of event {event_id}, page {page}")
         return prom_code.get_all_promo_codes(event_id, page)

@@ -1,4 +1,5 @@
 from flask_restplus import Resource, fields
+import logging
 
 from . import api
 
@@ -37,6 +38,8 @@ class SetRadiusToEvent(Resource):
         data = api.payload
         event_id = data["event_id"]
         radius = data["radius"]
+
+        logging.info(f"Seting a new radius to the event: {event_id}")
         return set_radius_to_event_controller(event_id, radius)
 
 
@@ -70,6 +73,8 @@ class SpreadRadiusInEvent(Resource):
         """
         data = api.payload
         event_id = data["event_id"]
+
+        logging.info(f"Seting a new radius to all the codes of the event: {event_id}")
         return spread_radius_in_event_controller(event_id)
 
 
@@ -105,4 +110,6 @@ class SetRadiusToPromCode(Resource):
         data = api.payload
         code = data["code"]
         radius = data["radius"]
+
+        logging.info(f"Seting a new radius to the code: {code}")
         return set_radius_to_prom_code_controller(code, radius)
