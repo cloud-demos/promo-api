@@ -1,0 +1,24 @@
+runtime: python
+env: flex
+entrypoint: gunicorn -b :$PORT main:app
+
+runtime_config:
+  python_version: 3.6
+
+service: default
+
+manual_scaling:
+  instances: 1
+resources:
+  cpu: 1
+  memory_gb: 1
+  disk_size_gb: 10
+
+env_variables:
+    # Replace user, password, database, and instance connection name with the values obtained
+    # when configuring your Cloud SQL instance.
+    SQLALCHEMY_DATABASE_URI: >-
+      postgresql+psycopg2://{{ postgresql_username }}:{{ postgresql_userpassword }}@/safeboda?host=/cloudsql/safeboda-213615:us-east1:safeboda-sandbox
+
+beta_settings:
+  cloud_sql_instances: safeboda-213615:us-east1:safeboda-sandbox

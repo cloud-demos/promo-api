@@ -1,0 +1,2 @@
+app.yaml filter=secrets-manager
+config.py filter=secrets-manager
