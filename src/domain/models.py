@@ -167,16 +167,15 @@ if __name__ == '__main__':
 
     parser.add_argument(
         '-a', '--action', type=str, default='init',
-        help='Options: init (fill tables whit initial data, the default), '
-             'd (delete)')
+        help='Options: init (fill tables whit initial data, this is '
+             'the default), d (delete the tables)')
 
     args = parser.parse_args()
 
     if args.action == "d" or args.action == "delete":
 
-        # litle hack to delete alembic table!
+        # litle hack to delete alembic table
         class AlembicVersion(db.Model):
-            """Docs."""
 
             __tablename__ = 'alembic_version'
             version_num = db.Column(db.String(32), primary_key=True)
@@ -185,5 +184,4 @@ if __name__ == '__main__':
         drop_database()
     else:
         # create_database()
-        # init_database()
-        pass
+        init_database()

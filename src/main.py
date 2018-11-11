@@ -36,6 +36,8 @@ if config.GENERATE_POSTMAN_COLLECTION:
         data = prom_code.api.as_postman(urlvars=urlvars, swagger=swagger)
         open("postman.json", "w").write(json.dumps(data))
 
+app = create_app()
+
 if __name__ == '__main__':
     app = create_app()
     app.run(host='localhost', port=8080, debug=True)
