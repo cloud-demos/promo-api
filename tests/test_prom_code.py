@@ -27,6 +27,9 @@ from main import create_app
 
 @pytest.fixture
 def app():
+    """
+    pytest flask plugin object
+    """
     app = create_app(tconfig)
     app.debug = True
     return app
@@ -34,6 +37,10 @@ def app():
 
 @pytest.fixture()
 def models_data():
+    """
+    pytest fixture database object
+    :return:
+    """
     models.create_database(os.path.join(curr_dir, 'tconfig.py'))
     models.init_database_for_tests([
         {
@@ -57,7 +64,7 @@ def models_data():
 
 def test_promo_code_generation_default_values(models_data, mocker, app):
     """
-    Generation of new promo codes for events
+    Generation of new promo codes using default values
     """
     mock_code = "mock_code"
 
@@ -115,7 +122,7 @@ def test_promo_code_generation(models_data, mocker, app):
 
 def test_promo_code_generation_expired(models_data, mocker, app):
     """
-
+        The promo code can expire
     """
 
     template = "%d-%m-%Y"
@@ -132,10 +139,6 @@ def test_promo_code_generation_expired(models_data, mocker, app):
 
 
 def test_promo_code_generation_notexpired(models_data, mocker, app):
-    """
-
-    """
-
     template = "%d-%m-%Y"
     default_expiration_mock_time = datetime.datetime.strptime(
         "08-02-2018", template)
@@ -153,10 +156,6 @@ def test_promo_code_generation_notexpired(models_data, mocker, app):
 
 def test_promo_code_generation_default_expiration_time_length(models_data,
                                                               mocker, app):
-    """
-
-    """
-
     template = "%d-%m-%Y"
     now_mock_time = datetime.datetime.strptime("01-02-2018", template)
     now_mock_time_plus_2_months = datetime.datetime.strptime(
@@ -170,7 +169,7 @@ def test_promo_code_generation_default_expiration_time_length(models_data,
 
 def test_promo_code_deactivation_activation(models_data, mocker, app):
     """
-
+        The promo code can be deactivated
     """
 
     mock_code = "mock_code"
@@ -198,7 +197,7 @@ def test_promo_code_deactivation_activation(models_data, mocker, app):
 
 def test_promo_code_lists(models_data, mocker, app):
     """
-
+        Return all promo codes
     """
 
     with app.app_context():
@@ -223,7 +222,8 @@ def test_promo_code_lists(models_data, mocker, app):
 
 def test_valid_promo_code_acording_distances(models_data, app):
     """
-
+        Only valid when user’s pickup or destination is within x radius of the
+        event venue
     """
 
     with app.app_context():
@@ -235,7 +235,8 @@ def test_valid_promo_code_acording_distances(models_data, app):
 def test_valid_promo_code_acording_distances_when_radius_change(models_data,
                                                                 app):
     """
-
+        Only valid when user’s pickup or destination is within x radius of the
+        event venue
     """
 
     with app.app_context():
@@ -246,7 +247,8 @@ def test_valid_promo_code_acording_distances_when_radius_change(models_data,
 
 def test_radius_change(models_data, app):
     """
-
+        Only valid when user’s pickup or destination is within x radius of the
+        event venue
     """
 
     with app.app_context():
@@ -257,7 +259,8 @@ def test_radius_change(models_data, app):
 def test_promo_code_valid_acording_distances_radius_changed_using_event(
         models_data, mocker, app):
     """
-
+        Only valid when user’s pickup or destination is within x radius of the
+        event venue
     """
 
     with app.app_context():
@@ -287,7 +290,10 @@ def test_promo_code_valid_acording_distances_radius_changed_using_event(
 
 def test_ride_from_prom_code(models_data, mocker, app):
     """
-
+        To test the validity of the promo code, expose an endpoint that accept
+        origin, destination, the promo code. The api should return the promo
+        code details and a polyline using the destination and origin if promo
+        code is valid and an error otherwise.
     """
 
     mock_value = 2
@@ -327,7 +333,12 @@ def test_ride_from_prom_code(models_data, mocker, app):
 
 def test_ride_from_prom_code_expired_error(models_data, mocker, app):
     """
+        To test the validity of the promo code, expose an endpoint that accept
+        origin, destination, the promo code. The api should return the promo
+        code details and a polyline using the destination and origin if promo
+        code is valid and an error otherwise.
 
+        Case: code expired
     """
 
     template = "%d-%m-%Y"
@@ -347,6 +358,12 @@ def test_ride_from_prom_code_expired_error(models_data, mocker, app):
 
 def test_prom_code_expired_error(models_data, mocker, app):
     """
+        To test the validity of the promo code, expose an endpoint that accept
+        origin, destination, the promo code. The api should return the promo
+        code details and a polyline using the destination and origin if promo
+        code is valid and an error otherwise.
+
+        Case: code expired error (EventDoNotExists)
 
     """
 
@@ -369,6 +386,11 @@ def test_prom_code_expired_error(models_data, mocker, app):
 
 
 def test_flask_prom_code_generate_error(models_data, mocker, client, app):
+    """
+        Generation of new promo codes for events
+
+        Case: error when the event do not exists
+    """
     mock_response = GeneratePromoCodeResult.EventDoNotExists, None
     mocker.patch.object(domain.prom_code, 'generate_promo_code',
                         return_value=mock_response)
@@ -383,6 +405,9 @@ def test_flask_prom_code_generate_error(models_data, mocker, client, app):
 
 
 def test_flask_prom_code_generate_ok(models_data, mocker, client, app):
+    """
+        Generation of new promo codes for events
+    """
     PromoCodeResultTuple = namedtuple('PromoCodeResultTuple', 'code')
     mock_code = "mock_code"
     mock_response = GeneratePromoCodeResult.Ok, PromoCodeResultTuple(mock_code)
@@ -399,6 +424,11 @@ def test_flask_prom_code_generate_ok(models_data, mocker, client, app):
 
 
 def test_flask_prom_code_generate_400_error(models_data, mocker, client, app):
+    """
+        Generation of new promo codes for events
+
+        Case: error when the event_id is missing
+    """
     with app.app_context():
         res = client.post(url_for('codes.prom_code_generate'),
                           json={
@@ -408,6 +438,11 @@ def test_flask_prom_code_generate_400_error(models_data, mocker, client, app):
 
 
 def test_flask_is_expired_promo_code_error(models_data, mocker, client, app):
+    """
+        Endpoint to query the expiration of a code
+
+        Case: error when the code do not exists
+    """
     mock_response = PromoCodeResult.PromoCodeDoNotExists, None
     mocker.patch.object(domain.prom_code, 'promo_code_is_expired',
                         return_value=mock_response)
@@ -420,6 +455,9 @@ def test_flask_is_expired_promo_code_error(models_data, mocker, client, app):
 
 
 def test_flask_is_expired_promo_code_ok(models_data, mocker, client, app):
+    """
+        Endpoint to query the expiration of a code
+    """
     mock_response = PromoCodeResult.Ok, True
     mocker.patch.object(domain.prom_code, 'promo_code_is_expired',
                         return_value=mock_response)
@@ -433,6 +471,11 @@ def test_flask_is_expired_promo_code_ok(models_data, mocker, client, app):
 
 
 def test_flask_promo_code_list(models_data, mocker, client, app):
+    """
+        Return all promo codes
+
+        Endpoint to query all the codes
+    """
     mock_response = [1, 2, 4, 1]
     mocker.patch.object(domain.prom_code, 'get_all_promo_codes',
                         return_value=mock_response)
@@ -445,6 +488,11 @@ def test_flask_promo_code_list(models_data, mocker, client, app):
 
 
 def test_flask_promo_code_list_active(models_data, mocker, client, app):
+    """
+        Return active promo codes
+
+        Endpoint to query all the active codes
+    """
     mock_response = [1, 2, 4, 1]
     mocker.patch.object(domain.prom_code, 'get_active_promo_codes',
                         return_value=mock_response)
@@ -457,6 +505,11 @@ def test_flask_promo_code_list_active(models_data, mocker, client, app):
 
 
 def test_flask_promo_code_activate_error(models_data, mocker, client, app):
+    """
+        Code activation
+
+        Case: error, when the code do not exists
+    """
     mock_response = PromoCodeResult.PromoCodeDoNotExists, None
     mocker.patch.object(domain.prom_code, 'activate_promo_code',
                         return_value=mock_response)
@@ -469,12 +522,22 @@ def test_flask_promo_code_activate_error(models_data, mocker, client, app):
 
 
 def test_flask_promo_code_activate_400_error(models_data, mocker, client, app):
+    """
+        Code activation
+
+        Case: error, when the code value is missing
+    """
     with app.app_context():
         res = client.put(url_for('codes.prom_code_activation'))
         assert res.status_code == 400
 
 
 def test_flask_promo_code_activate_ok(models_data, mocker, client, app):
+    """
+        Code activation
+
+        Case: ok
+    """
     PromoCodeResultTuple = namedtuple('PromoCodeResultTuple', 'code')
     mock_code = "mock_code"
     mock_response = PromoCodeResult.Ok, PromoCodeResultTuple(mock_code)
@@ -488,6 +551,11 @@ def test_flask_promo_code_activate_ok(models_data, mocker, client, app):
 
 
 def test_flask_promo_code_deactivate_error(models_data, mocker, client, app):
+    """
+        Codes can be deactivated
+
+        Case: error, when the code do not exists
+    """
     mock_response = PromoCodeResult.PromoCodeDoNotExists, None
     mocker.patch.object(domain.prom_code, 'deactivate_promo_code',
                         return_value=mock_response)
@@ -500,6 +568,11 @@ def test_flask_promo_code_deactivate_error(models_data, mocker, client, app):
 
 
 def test_flask_promo_code_deactivate_ok(models_data, mocker, client, app):
+    """
+        Codes can be deactivated
+
+        Case: ok
+    """
     PromoCodeResultTuple = namedtuple('PromoCodeResultTuple', 'code')
     mock_code = "mock_code"
     mock_response = PromoCodeResult.Ok, PromoCodeResultTuple(mock_code)
@@ -513,6 +586,11 @@ def test_flask_promo_code_deactivate_ok(models_data, mocker, client, app):
 
 
 def test_flask_set_radius_to_event_error(models_data, mocker, client, app):
+    """
+        To change the radius to an event
+
+        Case: error, when the event do not exists
+    """
     mock_response = SetRadiusFromEventsResult.EventDoNotExists, None
     mocker.patch.object(domain.prom_code, 'set_radius_to_event',
                         return_value=mock_response)
@@ -529,7 +607,10 @@ def test_flask_set_radius_to_event_error(models_data, mocker, client, app):
 
 def test_flask_set_radius_to_event_error_400(models_data, mocker, client, app):
     """
-    When a required field is missing the framework returns a 400 error
+        To change the radius to an event
+
+        Case: error, when a required field is missing the framework returns a
+        400 error
     """
     with app.app_context():
         res = client.post(url_for('codes.set_radius_to_event'),
@@ -540,6 +621,11 @@ def test_flask_set_radius_to_event_error_400(models_data, mocker, client, app):
 
 
 def test_flask_set_radius_to_event_ok(models_data, mocker, client, app):
+    """
+        To change the radius to an event
+
+        Case: ok
+    """
     EventResultTuple = namedtuple('EventResultTuple', 'name')
     mock_name = "mock_name"
     mock_response = SetRadiusFromEventsResult.Ok, EventResultTuple(mock_name)
@@ -557,6 +643,11 @@ def test_flask_set_radius_to_event_ok(models_data, mocker, client, app):
 
 def test_flask_spread_radius_from_event_to_all_prom_codes_error(
         models_data, mocker, client, app):
+    """
+        To change the radius to all the codes of an specific event
+
+        Case: error, the event do not exists
+    """
     mock_response = SetRadiusFromEventsResult.EventDoNotExists, None
     mocker.patch.object(domain.prom_code,
                         'spread_radius_from_event_to_all_prom_codes',
@@ -573,6 +664,11 @@ def test_flask_spread_radius_from_event_to_all_prom_codes_error(
 
 def test_flask_spread_radius_from_event_to_all_prom_codes_ok(
         models_data, mocker, client, app):
+    """
+        To change the radius to an event
+
+        Case: ok
+    """
     EventResultTuple = namedtuple('EventResultTuple', 'name')
     mock_name = "mock_name"
     mock_response = SetRadiusFromEventsResult.Ok, EventResultTuple(mock_name)
@@ -590,6 +686,11 @@ def test_flask_spread_radius_from_event_to_all_prom_codes_ok(
 
 
 def test_flask_set_radius_to_prom_code_error(models_data, mocker, client, app):
+    """
+        To change the radius to a code
+
+        Case: error, when the code do not exists
+    """
     mock_response = SetRadiusResult.PromCodeDoNotExists, None
     mocker.patch.object(domain.prom_code, 'set_radius_to_prom_code',
                         return_value=mock_response)
@@ -605,6 +706,11 @@ def test_flask_set_radius_to_prom_code_error(models_data, mocker, client, app):
 
 
 def test_flask_set_radius_to_prom_code_ok(models_data, mocker, client, app):
+    """
+        To change the radius to an event
+
+        Case: ok
+    """
     PromoCodeResultTuple = namedtuple('PromoCodeResultTuple', 'code')
     mock_code = "mock_code"
     mock_response = SetRadiusResult.Ok, PromoCodeResultTuple(mock_code)
@@ -623,6 +729,14 @@ def test_flask_set_radius_to_prom_code_ok(models_data, mocker, client, app):
 
 def get_ride_from_prom_code_error(
         models_data, mocker, client, app, mock_response_code):
+    """
+        To test the validity of the promo code, expose an endpoint that accept
+        origin, destination, the promo code. The api should return the promo
+        code details and a polyline using the destination and origin if promo
+        code is valid and an error otherwise.
+
+        Case: error, when a requirement is not satisfied
+    """
     mock_response = mock_response_code, None
     mocker.patch.object(domain.prom_code, 'get_ride_from_prom_code',
                         return_value=mock_response)
@@ -689,6 +803,14 @@ def test_flask_get_ride_from_prom_code_ok(models_data, mocker, client, app):
     RideFromPromCodeResultTuple = namedtuple('RideFromPromCodeResultTuple',
                                              'code credit event_id '
                                              'expiration_time ')
+    """
+        To test the validity of the promo code, expose an endpoint that accept 
+        origin, destination, the promo code. The api should return the promo 
+        code details and a polyline using the destination and origin if promo 
+        code is valid and an error otherwise. 
+
+        Case: ok
+    """
     mock_code = "mock_code"
     mock_credit = 34
     mock_event_id = 3
