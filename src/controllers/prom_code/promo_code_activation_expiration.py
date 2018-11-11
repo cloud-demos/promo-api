@@ -12,7 +12,6 @@ activation_parser.add_argument('code', type=str, location='args',
 
 
 def deactivate_promo_code_controller(code):
-    """Docs."""
     relation = {
         PromoCodeResult.PromoCodeDoNotExists:
             lambda _: {"status": "error",
@@ -27,17 +26,21 @@ def deactivate_promo_code_controller(code):
 
 @api.route('/deactivate')
 class PromCodeDeactivation(Resource):
-    """Docs."""
 
     def put(self):
-        """Docs."""
+        """
+            Code deactivation
+
+            Given a code this deactivate it.
+            It requires a "code" query parameter.
+
+        """
         args = activation_parser.parse_args()
         code = args['code']
         return deactivate_promo_code_controller(code)
 
 
 def activate_promo_code_controller(code):
-    """Docs."""
     relation = {
         PromoCodeResult.PromoCodeDoNotExists:
             lambda _: {"status": "error",
@@ -52,17 +55,21 @@ def activate_promo_code_controller(code):
 
 @api.route('/activate')
 class PromCodeActivation(Resource):
-    """Docs."""
 
     def put(self):
-        """Docs."""
+        """
+            Code activation
+
+            Given a code this activate it.
+            It requires a "code" query parameter.
+
+        """
         args = activation_parser.parse_args()
         code = args['code']
         return activate_promo_code_controller(code)
 
 
 def promo_code_is_expired_controller(code):
-    """Docs."""
     relation = {
         PromoCodeResult.PromoCodeDoNotExists:
             lambda _: {"status": "error",
@@ -77,10 +84,14 @@ def promo_code_is_expired_controller(code):
 
 @api.route('/expired')
 class PromCodeExpired(Resource):
-    """Docs."""
-
     def get(self):
-        """Docs."""
+        """
+            Code expiration query
+
+            Given a code it respond about the "expired" state.
+            It requires a "code" query parameter.
+
+        """
         args = activation_parser.parse_args()
         code = args['code']
         return promo_code_is_expired_controller(code)

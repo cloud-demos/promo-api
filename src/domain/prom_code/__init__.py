@@ -14,6 +14,13 @@ GeneratePromoCodeResult = Enum('GeneratePromoCodeResult',
 
 
 def generate_promo_code(event_id, data={}):
+    """
+        The promotional code generation logic
+
+    :param event_id: The target event of the codes
+    :param data: Parameters to create the promotional code
+    :return: (EventDoNotExists, None) | (Ok, pcode)
+    """
     event = Event.query.get(event_id)
     if not event:
         return GeneratePromoCodeResult.EventDoNotExists, None
@@ -43,6 +50,11 @@ PromoCodeResult = Enum('PromoCodeResult', 'PromoCodeDoNotExists Ok')
 
 
 def promo_code_is_expired(code):
+    """
+        Checking the "expired" state of an code
+    :param code: The code in question
+    :return: (PromoCodeDoNotExists, None) | (Ok, <expired state>)
+    """
     pcode = db.session.query(PromCode).filter(PromCode.code == code).first()
     if not pcode:
         return PromoCodeResult.PromoCodeDoNotExists, None
@@ -51,6 +63,11 @@ def promo_code_is_expired(code):
 
 
 def deactivate_promo_code(code):
+    """
+        Code deactivation
+    :param code: The code to deactivate
+    :return: (PromoCodeDoNotExists, None) | (Ok, <updated code object>)
+    """
     pcode = db.session.query(PromCode).filter(PromCode.code == code).first()
     if not pcode:
         return PromoCodeResult.PromoCodeDoNotExists, None
@@ -61,6 +78,11 @@ def deactivate_promo_code(code):
 
 
 def activate_promo_code(code):
+    """
+        Code activation
+    :param code: The code to activate
+    :return: (PromoCodeDoNotExists, None) | (Ok, <updated code object>)
+    """
     pcode = db.session.query(PromCode).filter(PromCode.code == code).first()
     if not pcode:
         return PromoCodeResult.PromoCodeDoNotExists, None
@@ -71,12 +93,26 @@ def activate_promo_code(code):
 
 
 def get_all_promo_codes(event_id, page=1, page_length=50):
+    """
+        All the codes from an specific event
+    :param event_id: The event to query
+    :param page: Page number
+    :param page_length: Page length
+    :return: The corresponding page
+    """
     offset = (page - 1) * page_length
     return db.session.query(PromCode).filter(
         PromCode.event_id == event_id).offset(offset).limit(page_length).all()
 
 
 def get_active_promo_codes(event_id, page=1, page_length=50):
+    """
+        All the active codes from an specific event
+    :param event_id: The event to query
+    :param page: Page number
+    :param page_length: Page length
+    :return: The corresponding page
+    """
     offset = (page - 1) * page_length
     return db.session.query(PromCode).filter(
         and_(PromCode.active, PromCode.event_id == event_id)) \
@@ -88,6 +124,12 @@ SetRadiusFromEventsResult = Enum('SetRadiusFromEventsResult',
 
 
 def set_radius_to_event(event_id, radius):
+    """
+        Changing the radius to an event
+    :param event_id: The event to change
+    :param radius: The new radius
+    :return: (EventDoNotExists, None) | (Ok, <the event changed>)
+    """
     event = Event.query.get(event_id)
     if not event:
         return SetRadiusFromEventsResult.EventDoNotExists, None
@@ -98,6 +140,11 @@ def set_radius_to_event(event_id, radius):
 
 
 def spread_radius_from_event_to_all_prom_codes(event_id):
+    """
+        Sets the event radius to all his codes
+    :param event_id: The event to process
+    :return: (EventDoNotExists, None) | (Ok, <the event used>)
+    """
     event = Event.query.get(event_id)
     if not event:
         return SetRadiusFromEventsResult.EventDoNotExists, None
@@ -112,6 +159,12 @@ SetRadiusResult = Enum('SetRadiusResult', 'PromCodeDoNotExists Ok')
 
 
 def set_radius_to_prom_code(code, radius):
+    """
+        To change the radius to a specific promotional code
+    :param code: The code to update
+    :param radius: The new radius
+    :return: (PromCodeDoNotExists, None) | (Ok, <the code updated>)
+    """
     pcode = db.session.query(PromCode).filter(PromCode.code == code).first()
     if not pcode:
         return SetRadiusResult.PromCodeDoNotExists, None
@@ -128,12 +181,31 @@ RideFromPromCodeResult = Enum('RideFromPromCodeResult',
 
 
 def calculate_value(origin_lat, origin_lng, dest_lat, dest_lng):
+    """
+        A made up way to calculate the value of an specific ride.
+
+    :return: <distance in miles> * <price of a mile>
+    """
     dist = distance.distance(
         (origin_lat, origin_lng), (dest_lat, dest_lng)).miles
     return dist * config.MILES_COST
 
 
 def get_ride_from_prom_code(origin_lat, origin_lng, dest_lat, dest_lng, code):
+    """
+        The logic to validate and to apply the use of a code.
+
+    :param origin_lat: Origin coordinates.
+    :param origin_lng: Origin coordinates.
+    :param dest_lat: Destinatioh coordinates.
+    :param dest_lng: Destinatioh coordinates.
+    :param code: The code to use.
+    :return: (<error code>, None) | Ok, {
+        "code": <the code object used>,
+        "polyline": <a polyline with origin and destination coordinates and
+        several data about the code.>
+    }
+    """
     pcode = db.session.query(PromCode).filter(PromCode.code == code).first()
     if not pcode:
         return RideFromPromCodeResult.PromCodeDoNotExists, None

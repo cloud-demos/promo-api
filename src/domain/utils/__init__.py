@@ -7,10 +7,18 @@ import config
 
 
 def get_now():
+    """
+        A "now" function to be able to mock it.
+    :return: The curren time
+    """
     return datetime.datetime.now()
 
 
 def get_default_expiration_time():
+    """
+        A way to calculate an expiration time.
+    :return: The expiration date
+    """
     now = get_now()
     default_expiration_time = now + dateutil.relativedelta.relativedelta(
         years=config.Expiration_time_Years,

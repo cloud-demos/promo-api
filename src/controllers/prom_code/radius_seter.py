@@ -14,7 +14,6 @@ SetRadiusToEventModel = api.model('SetRadiusToEventModel',
 
 
 def set_radius_to_event_controller(event_id, radius):
-    """Docs."""
     relation = {
         SetRadiusFromEventsResult.EventDoNotExists:
             lambda _: {"status": "error",
@@ -29,11 +28,12 @@ def set_radius_to_event_controller(event_id, radius):
 
 @api.route('/set-radius-to-event')
 class SetRadiusToEvent(Resource):
-    """Docs."""
 
     @api.expect(SetRadiusToEventModel, validate=True)
     def post(self):
-        """Docs."""
+        """
+            Sets a radius to an event
+        """
         data = api.payload
         event_id = data["event_id"]
         radius = data["radius"]
@@ -48,7 +48,6 @@ SpreadRadiusInEventModel = api.model('SpreadRadiusInEventModel',
 
 
 def spread_radius_in_event_controller(event_id):
-    """Docs."""
     relation = {
         SetRadiusFromEventsResult.EventDoNotExists:
             lambda _: {"status": "error",
@@ -63,11 +62,12 @@ def spread_radius_in_event_controller(event_id):
 
 @api.route('/spread-radius-in-event')
 class SpreadRadiusInEvent(Resource):
-    """Docs."""
 
     @api.expect(SpreadRadiusInEventModel, validate=True)
     def post(self):
-        """Docs."""
+        """
+            Sets the event radius to all his codes
+        """
         data = api.payload
         event_id = data["event_id"]
         return spread_radius_in_event_controller(event_id)
@@ -82,7 +82,6 @@ SetRadiusToPromCodeModel = api.model('SetRadiusToPromCodeModel',
 
 
 def set_radius_to_prom_code_controller(code, radius):
-    """Docs."""
     relation = {
         SetRadiusResult.PromCodeDoNotExists:
             lambda _: {"status": "error",
@@ -97,11 +96,12 @@ def set_radius_to_prom_code_controller(code, radius):
 
 @api.route('/set-radius-to-prom-code')
 class SetRadiusToPromCode(Resource):
-    """Docs."""
 
     @api.expect(SetRadiusToPromCodeModel, validate=True)
     def post(self):
-        """Docs."""
+        """
+            Change the radius to an specific code
+        """
         data = api.payload
         code = data["code"]
         radius = data["radius"]

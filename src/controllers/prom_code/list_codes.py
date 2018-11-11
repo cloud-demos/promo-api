@@ -24,11 +24,18 @@ pagination_parser.add_argument('page', type=int, location='args',
 
 @api.route('/list-active')
 class PromCodeActiveList(Resource):
-    """Docs."""
 
     @api.marshal_with(GetPromoCodeModel, code=200, skip_none=True)
     def get(self):
-        """Docs."""
+        """
+        The active codes
+
+
+        Returns the active codes of an specific event_id
+
+        It allows pagination using the "page" query parameter.
+
+        """
         args = pagination_parser.parse_args()
         event_id = args["event_id"]
         page = args.get('page')
@@ -37,11 +44,18 @@ class PromCodeActiveList(Resource):
 
 @api.route('/list')
 class PromCodeList(Resource):
-    """Docs."""
 
     @api.marshal_with(GetPromoCodeModel, code=200, skip_none=True)
     def get(self):
-        """Docs."""
+        """
+        All the codes
+
+
+        Returns the codes of an specific event_id
+
+        It allows pagination using the "page" query parameter.
+
+        """
         args = pagination_parser.parse_args()
         event_id = args["event_id"]
         page = args.get('page')

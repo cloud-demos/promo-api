@@ -18,7 +18,6 @@ PromoCodeCreationModel = api.model('PromoCodeCreationModel',
 
 
 def generate_promo_code_controller(event_id, data):
-    """Docs."""
     relation = {
         GeneratePromoCodeResult.EventDoNotExists:
             lambda _: {"status": "error",
@@ -33,11 +32,15 @@ def generate_promo_code_controller(event_id, data):
 
 @api.route('/generate')
 class PromCodeGenerate(Resource):
-    """Docs."""
+    """
+        Endpoint to generate a promotional code
+    """
 
     @api.expect(PromoCodeCreationModel, validate=True)
     def post(self):
-        """Docs."""
+        """
+            Promotional code generation
+        """
         data = api.payload
         event_id = data["event_id"]
         del data["event_id"]

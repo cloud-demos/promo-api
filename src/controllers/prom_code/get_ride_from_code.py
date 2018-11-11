@@ -20,7 +20,6 @@ GetRideFromPromoCodeModel = api.model('GetRideFromPromoCodeModel',
 
 def get_ride_from_prom_code_controller(
         origin_lat, origin_lng, dest_lat, dest_lng, code):
-    """Docs."""
     template = "%Y-%m-%d"
     relation = {
         RideFromPromCodeResult.PromCodeDoNotExists:
@@ -63,11 +62,27 @@ def get_ride_from_prom_code_controller(
 
 @api.route('/get-ride')
 class GetRideFromPromCode(Resource):
-    """Docs."""
+    """
+        Get a ride using a promotional code.
+
+        Several constraints are apply
+    """
 
     @api.expect(GetRideFromPromoCodeModel, validate=True)
     def post(self):
-        """Docs."""
+        """
+            Get a ride using a promotional code
+
+            Several constraints are apply and can be response errors:
+                . The event do not exists
+                . The Prom Code is Inactive
+                . The origin and the destination are to far from the event
+                . The code's credit is insuficient for that ride
+                . The code is expired
+
+            When the request is ok the response includes a polyline with
+            origin and destination coordinates and several data about the code.
+        """
         data = api.payload
         code = data["code"]
         origin_lat = data["origin_lat"]
