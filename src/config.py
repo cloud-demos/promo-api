@@ -18,7 +18,7 @@ LOCAL = os.environ.get("LOCAL", None)
 GENERATE_POSTMAN_COLLECTION = False
 
 if LOCAL:
-    SQLALCHEMY_DATABASE_URI = 'postgresql://{{ postgresql_username }}:8GShwQeSMVULP0z1NcE+19QfYcYWKi@172.17.0.2:5432/safeboda'
+    SQLALCHEMY_DATABASE_URI = 'postgresql://{{ postgresql_username }}:{{ postgresql_userpassword }}@172.17.0.2:5432/safeboda'
 
     SQLALCHEMY_TRACK_MODIFICATIONS = True
 
@@ -30,7 +30,7 @@ else:
     if os.environ.get('GAE_INSTANCE'):
         SQLALCHEMY_DATABASE_URI = os.environ['SQLALCHEMY_DATABASE_URI']
     else:
-        SQLALCHEMY_DATABASE_URI = 'postgresql+psycopg2://{{ postgresql_username }}:8GShwQeSMVULP0z1NcE+19QfYcYWKi@35.196.21.230:5432/safeboda'
+        SQLALCHEMY_DATABASE_URI = 'postgresql+psycopg2://{{ postgresql_username }}:{{ postgresql_userpassword }}@35.196.21.230:5432/safeboda'
 
     SQLALCHEMY_POOL_SIZE = 6
     SQLALCHEMY_POOL_TIMEOUT = 20

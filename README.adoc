@@ -1,0 +1,67 @@
+
+== Technologies
+
+This is implemented in Python 3 using the microframework Flask.
+The database is PostgreSQL 9.6.
+The deployment target is Google App Engine Flexible environment.
+
+To see how to clone the project and set up the deployment scripts:
+
+https://github.com/cloud-demos/promo-devOps
+
+== DB related
+
+=== Prepare the DB
+
+In a PostgreSQL console:
+
+[source,shell]
+----
+CREATE DATABASE safeboda;
+create user safeboda_user;
+alter user safeboda_user with encrypted password '8GShwQeSMVULP0z1NcE+19QfYcYWKi'
+grant all privileges on database safeboda to safeboda_user;
+
+
+CREATE DATABASE safeboda_test;
+create user safeboda_user_test;
+alter user safeboda_user_test with encrypted password 'safeboda_user_test-password'
+grant all privileges on database safeboda_test to safeboda_user;
+----
+
+=== Configure the database in the project
+
+To put the server IP in "/src/config.py" for local deployment.
+To put the server IP in "/tests/tconfig.py" for testing.
+
+=== To create the database
+
+These commands assume you are in "src" folder.
+
+==== To apply the current migration (create the database)
+
+`flask db upgrade`
+
+
+== API
+
+To see the swagger: run the local server and go to:
+
+http://localhost:8080/api/v1/code/swagger
+
+=== run the local server
+
+Set an environment variable to
+
+`python src/main.py`
+
+== Tests
+
+To install the tests dependencies:
+
+`pip install -r requirements-tests.txt`
+
+Run the tests
+
+`pytest --html=report.html --cov=src/ --cov-report=html --disable-warnings tests`
+
