@@ -1,4 +1,5 @@
 from enum import Enum
+import logging
 
 from sqlalchemy import and_
 
@@ -23,6 +24,8 @@ def generate_promo_code(event_id, data={}):
     """
     event = Event.query.get(event_id)
     if not event:
+        logging.error(f"Generating a new code. The event: {event_id} do not "
+                      f"exists")
         return GeneratePromoCodeResult.EventDoNotExists, None
 
     pcode = True
@@ -31,6 +34,7 @@ def generate_promo_code(event_id, data={}):
         pcode = db.session.query(PromCode).filter(PromCode.code == code) \
             .first()
 
+    logging.info(f"Creating a new promotional code")
     pcode = PromCode(
         event_id=event_id,
         credit=data.get("credit", config.DEFAULT_CREDIT),
@@ -43,6 +47,7 @@ def generate_promo_code(event_id, data={}):
     db.session.add(pcode)
     db.session.commit()
 
+    logging.info(f"Promotional code created")
     return GeneratePromoCodeResult.Ok, pcode
 
 
@@ -57,6 +62,8 @@ def promo_code_is_expired(code):
     """
     pcode = db.session.query(PromCode).filter(PromCode.code == code).first()
     if not pcode:
+        logging.error(f"Checking the expired state. The code: {code} do not "
+                      f"exists")
         return PromoCodeResult.PromoCodeDoNotExists, None
 
     return PromoCodeResult.Ok, pcode.expired()
@@ -70,6 +77,7 @@ def deactivate_promo_code(code):
     """
     pcode = db.session.query(PromCode).filter(PromCode.code == code).first()
     if not pcode:
+        logging.error(f"Deactivation a code. The code: {code} do not exists")
         return PromoCodeResult.PromoCodeDoNotExists, None
 
     pcode.deactivate()
@@ -85,6 +93,7 @@ def activate_promo_code(code):
     """
     pcode = db.session.query(PromCode).filter(PromCode.code == code).first()
     if not pcode:
+        logging.error(f"Activation a code. The code: {code} do not exists")
         return PromoCodeResult.PromoCodeDoNotExists, None
 
     pcode.activate()
@@ -132,6 +141,8 @@ def set_radius_to_event(event_id, radius):
     """
     event = Event.query.get(event_id)
     if not event:
+        logging.error(f"Changing the radius to an event. The event: {event_id} "
+                      f"do not exists")
         return SetRadiusFromEventsResult.EventDoNotExists, None
 
     event.set_radius(radius)
@@ -147,6 +158,8 @@ def spread_radius_from_event_to_all_prom_codes(event_id):
     """
     event = Event.query.get(event_id)
     if not event:
+        logging.error(f"Seting the event radius to all his codes. The event: "
+                      f"{event_id} do not exists")
         return SetRadiusFromEventsResult.EventDoNotExists, None
 
     for pcode in event.prom_codes:
@@ -167,6 +180,8 @@ def set_radius_to_prom_code(code, radius):
     """
     pcode = db.session.query(PromCode).filter(PromCode.code == code).first()
     if not pcode:
+        logging.error(f"Changing the radius to a promotional code. "
+                      f"The code: {code} do not exists")
         return SetRadiusResult.PromCodeDoNotExists, None
 
     pcode.set_radius(radius)
@@ -208,23 +223,33 @@ def get_ride_from_prom_code(origin_lat, origin_lng, dest_lat, dest_lng, code):
     """
     pcode = db.session.query(PromCode).filter(PromCode.code == code).first()
     if not pcode:
+        logging.error(f"Geting a ride from a prom code. "
+                      f"The code: {code} do not exists")
         return RideFromPromCodeResult.PromCodeDoNotExists, None
 
     if not pcode.active:
+        logging.error(f"Geting a ride from a prom code. "
+                      f"The code: {code} is inactive")
         return RideFromPromCodeResult.PromCodeInactive, None
 
     if pcode.expired():
+        logging.error(f"Geting a ride from a prom code. "
+                      f"The code: {code} is expired")
         return RideFromPromCodeResult.PromCodeExpired, None
 
     origin_valid = pcode.is_valid(origin_lat, origin_lng)
     dest_valid = pcode.is_valid(dest_lat, dest_lng)
 
     if not (origin_valid or dest_valid):
+        logging.error(f"Geting a ride from a prom code. "
+                      f"The code: {code} is invalid")
         return RideFromPromCodeResult.PromCodeInvalid, None
 
     cost = calculate_value(origin_lat, origin_lng, dest_lat, dest_lng)
 
     if pcode.credit < cost:
+        logging.error(f"Geting a ride from a prom code. "
+                      f"The code: {code} do not have enough credit")
         return RideFromPromCodeResult.InsuficientCredit, None
 
     pcode.decrement_credit(cost)
