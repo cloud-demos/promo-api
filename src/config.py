@@ -13,12 +13,12 @@ JWT_SECRET = 'bmiznfu5bghP/C/aM4tQtV7M+HV16rOLulIjTypGlWnHPZze9+LB3u86hFaA2hlb+W
 
 SECRET_KEY = '5eBLvOO/wsoags7UcMylN8MA1ltLLbIEwBgFbgyhDlzyoG71jS0xksWUX2OG+hcybSJOhAp/UI6b'
 
-LOCAL = os.environ.get("LOCAL", None)
+LOCAL = os.environ.get("LOCAL", "No")
 
 GENERATE_POSTMAN_COLLECTION = False
 
-if LOCAL:
-    SQLALCHEMY_DATABASE_URI = 'postgresql://{{ postgresql_username }}:{{ postgresql_userpassword }}@172.17.0.2:5432/safeboda'
+if LOCAL != "No":
+    SQLALCHEMY_DATABASE_URI = f"postgresql://{os.environ.get('DATABASE_USER')}:{os.environ.get('DATABASE_PASS')}@{os.environ.get('DATABASE_HOST')}:5432/promo_code_db"
 
     SQLALCHEMY_TRACK_MODIFICATIONS = True
 
@@ -30,7 +30,7 @@ else:
     if os.environ.get('GAE_INSTANCE'):
         SQLALCHEMY_DATABASE_URI = os.environ['SQLALCHEMY_DATABASE_URI']
     else:
-        SQLALCHEMY_DATABASE_URI = 'postgresql+psycopg2://{{ postgresql_username }}:{{ postgresql_userpassword }}@35.196.21.230:5432/safeboda'
+        SQLALCHEMY_DATABASE_URI = f"postgresql+psycopg2://{os.environ.get('PROD_DATABASE_USER')}:{os.environ.get('PROD_DATABASE_PASS')}@{os.environ.get('PROD_DATABASE_HOST')}:5432/promo_code_db"
 
     SQLALCHEMY_POOL_SIZE = 6
     SQLALCHEMY_POOL_TIMEOUT = 20

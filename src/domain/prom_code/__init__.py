@@ -14,41 +14,45 @@ GeneratePromoCodeResult = Enum('GeneratePromoCodeResult',
                                'EventDoNotExists Ok')
 
 
-def generate_promo_code(event_id, data={}):
+def generate_promo_code(event_id, amount, data={}):
     """
         The promotional code generation logic
 
     :param event_id: The target event of the codes
+    :param amount: The amount of codes to create
     :param data: Parameters to create the promotional code
     :return: (EventDoNotExists, None) | (Ok, pcode)
     """
     event = Event.query.get(event_id)
     if not event:
-        logging.warning(f"Generating a new code. The event: {event_id} do not "
+        logging.warning(f"Generating new codes. The event: {event_id} do not "
                         f"exists")
         return GeneratePromoCodeResult.EventDoNotExists, None
 
-    pcode = True
-    while pcode:
-        code = utils.string_generator(config.CODE_LENGTH)
-        pcode = db.session.query(PromCode).filter(PromCode.code == code) \
-            .first()
+    logging.info(f"Creating {amount} new promotionals codes for the event: {event_id}")
+    pcodes = []
+    for i in range(amount):
+        pcode = True
+        while pcode:
+            code = utils.string_generator(config.CODE_LENGTH)
+            pcode = db.session.query(PromCode).filter(PromCode.code == code) \
+                .first()
 
-    logging.info(f"Creating a new promotional code for the event {event_id}")
-    pcode = PromCode(
-        event_id=event_id,
-        credit=data.get("credit", config.DEFAULT_CREDIT),
-        radius=data.get("radius", event.radius),
-        expiration_time=data.get("expiration_time",
-                                 utils.get_default_expiration_time()),
-        code=code,
-    )
+        pcode = PromCode(
+            event_id=event_id,
+            credit=data.get("credit", config.DEFAULT_CREDIT),
+            radius=data.get("radius", event.radius),
+            expiration_time=data.get("expiration_time",
+                                     utils.get_default_expiration_time()),
+            code=code,
+        )
 
-    db.session.add(pcode)
-    db.session.commit()
+        pcodes.append(pcode)
+        db.session.add(pcode)
+        db.session.commit()
 
-    logging.info(f"Promotional code created")
-    return GeneratePromoCodeResult.Ok, pcode
+    logging.info(f"Promotional codes created")
+    return GeneratePromoCodeResult.Ok, pcodes
 
 
 PromoCodeResult = Enum('PromoCodeResult', 'PromoCodeDoNotExists Ok')

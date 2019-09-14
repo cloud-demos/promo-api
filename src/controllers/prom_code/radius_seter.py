@@ -111,5 +111,5 @@ class SetRadiusToPromCode(Resource):
         code = data["code"]
         radius = data["radius"]
 
-        logging.info(f"Seting a new radius to the code: {code}")
+        logging.info(f"Setting a new radius to the code: {code}")
         return set_radius_to_prom_code_controller(code, radius)
