@@ -22,7 +22,8 @@ if LOCAL != "No":
 
     SQLALCHEMY_TRACK_MODIFICATIONS = True
 
-    GENERATE_POSTMAN_COLLECTION = os.environ.get("GENERATE_POSTMAN_COLLECTION", None)
+    GENERATE_POSTMAN_COLLECTION = os.environ.get("GENERATE_POSTMAN_COLLECTION",
+                                                 None)
 
     SERVER_NAME = "localhost:8080"
 

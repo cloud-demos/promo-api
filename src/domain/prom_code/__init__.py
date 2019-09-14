@@ -29,7 +29,8 @@ def generate_promo_code(event_id, amount, data={}):
                         f"exists")
         return GeneratePromoCodeResult.EventDoNotExists, None
 
-    logging.info(f"Creating {amount} new promotionals codes for the event: {event_id}")
+    logging.info(
+        f"Creating {amount} new promotionals codes for the event: {event_id}")
     pcodes = []
     for i in range(amount):
         pcode = True
@@ -145,8 +146,9 @@ def set_radius_to_event(event_id, radius):
     """
     event = Event.query.get(event_id)
     if not event:
-        logging.warning(f"Changing the radius to an event. The event: {event_id} "
-                        f"do not exists")
+        logging.warning(
+            f"Changing the radius to an event. The event: {event_id} "
+            f"do not exists")
         return SetRadiusFromEventsResult.EventDoNotExists, None
 
     event.set_radius(radius)
@@ -162,8 +164,9 @@ def spread_radius_from_event_to_all_prom_codes(event_id):
     """
     event = Event.query.get(event_id)
     if not event:
-        logging.warning(f"Seting the event radius to all his codes. The event: "
-                        f"{event_id} do not exists")
+        logging.warning(
+            f"Seting the event radius to all his codes. The event: "
+            f"{event_id} do not exists")
         return SetRadiusFromEventsResult.EventDoNotExists, None
 
     for pcode in event.prom_codes:
@@ -193,10 +196,10 @@ def set_radius_to_prom_code(code, radius):
     return SetRadiusResult.Ok, pcode
 
 
-RideFromPromCodeResult = Enum('RideFromPromCodeResult',
-                              'PromCodeDoNotExists '
-                              'PromCodeInactive PromCodeInvalid '
-                              'InsuficientCredit PromCodeExpired Ok')
+RideFromPromCodeResult = Enum(
+    'RideFromPromCodeResult', 'PromCodeDoNotExists '
+    'PromCodeInactive PromCodeInvalid '
+    'InsuficientCredit PromCodeExpired Ok')
 
 
 def calculate_value(origin_lat, origin_lng, dest_lat, dest_lng):
@@ -205,8 +208,8 @@ def calculate_value(origin_lat, origin_lng, dest_lat, dest_lng):
 
     :return: <distance in miles> * <price of a mile>
     """
-    dist = distance.distance(
-        (origin_lat, origin_lng), (dest_lat, dest_lng)).miles
+    dist = distance.distance((origin_lat, origin_lng),
+                             (dest_lat, dest_lng)).miles
     return dist * config.MILES_COST
 
 
@@ -259,7 +262,8 @@ def get_ride_from_prom_code(origin_lat, origin_lng, dest_lat, dest_lng, code):
     pcode.decrement_credit(cost)
 
     return RideFromPromCodeResult.Ok, {
-        "code": pcode,
-        "polyline": polyline.encode(
-            [(origin_lat, origin_lng), (dest_lat, dest_lng)], 5),
+        "code":
+        pcode,
+        "polyline":
+        polyline.encode([(origin_lat, origin_lng), (dest_lat, dest_lng)], 5),
     }

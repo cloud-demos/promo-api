@@ -19,41 +19,46 @@ GetRideFromPromoCodeModel = api.model('GetRideFromPromoCodeModel',
                                       getRideFromPromoCodeModelDict)
 
 
-def get_ride_from_prom_code_controller(
-        origin_lat, origin_lng, dest_lat, dest_lng, code):
+def get_ride_from_prom_code_controller(origin_lat, origin_lng, dest_lat,
+                                       dest_lng, code):
     template = "%Y-%m-%d"
     relation = {
-        RideFromPromCodeResult.PromCodeDoNotExists:
-            lambda _: {"status": "error",
-                       "reason": "The event do not exists"},
-
-        RideFromPromCodeResult.PromCodeInactive:
-            lambda _: {"status": "error",
-                       "reason": "The Prom Code is Inactive"},
-
-        RideFromPromCodeResult.PromCodeInvalid:
-            lambda _: {"status": "error",
-                       "reason": "The origin and the destination are to far "
-                                 "from the event"},
-
-        RideFromPromCodeResult.InsuficientCredit:
-            lambda _: {"status": "error",
-                       "reason": "The code's credit is insuficient for "
-                                 "that ride"},
-
-        RideFromPromCodeResult.PromCodeExpired:
-            lambda _: {"status": "error",
-                       "reason": "The code is expired"},
-
-        RideFromPromCodeResult.Ok:
-            lambda data: {"status": "ok",
-                          "code": data["code"].code,
-                          "remaining_credit": data["code"].credit,
-                          "event_id": data["code"].event_id,
-                          "expiration_time": datetime.datetime.strftime(
-                              data["code"].expiration_time, template),
-                          "polyline": data["polyline"]
-                          },
+        RideFromPromCodeResult.PromCodeDoNotExists: lambda _: {
+            "status": "error",
+            "reason": "The event do not exists"
+        },
+        RideFromPromCodeResult.PromCodeInactive: lambda _: {
+            "status": "error",
+            "reason": "The Prom Code is Inactive"
+        },
+        RideFromPromCodeResult.PromCodeInvalid: lambda _: {
+            "status": "error",
+            "reason": "The origin and the destination are to far "
+            "from the event"
+        },
+        RideFromPromCodeResult.InsuficientCredit: lambda _: {
+            "status": "error",
+            "reason": "The code's credit is insuficient for "
+            "that ride"
+        },
+        RideFromPromCodeResult.PromCodeExpired: lambda _: {
+            "status": "error",
+            "reason": "The code is expired"
+        },
+        RideFromPromCodeResult.Ok: lambda data: {
+            "status":
+            "ok",
+            "code":
+            data["code"].code,
+            "remaining_credit":
+            data["code"].credit,
+            "event_id":
+            data["code"].event_id,
+            "expiration_time":
+            datetime.datetime.strftime(data["code"].expiration_time, template),
+            "polyline":
+            data["polyline"]
+        },
     }
 
     response_code, res = prom_code.get_ride_from_prom_code(
@@ -68,7 +73,6 @@ class GetRideFromPromCode(Resource):
 
         Several constraints are used
     """
-
     @api.expect(GetRideFromPromoCodeModel, validate=True)
     def post(self):
         """
@@ -92,5 +96,5 @@ class GetRideFromPromCode(Resource):
         dest_lng = data["dest_lng"]
 
         logging.info(f"Geting a ride using the promotional code {code}")
-        return get_ride_from_prom_code_controller(
-            origin_lat, origin_lng, dest_lat, dest_lng, code)
+        return get_ride_from_prom_code_controller(origin_lat, origin_lng,
+                                                  dest_lat, dest_lng, code)

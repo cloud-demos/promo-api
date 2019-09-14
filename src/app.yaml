@@ -18,7 +18,7 @@ env_variables:
     # Replace user, password, database, and instance connection name with the values obtained
     # when configuring your Cloud SQL instance.
     SQLALCHEMY_DATABASE_URI: >-
-      postgresql+psycopg2://{{ postgresql_username }}:{{ postgresql_userpassword }}@/safeboda?host=/cloudsql/safeboda-213615:us-east1:safeboda-sandbox
+      postgresql+psycopg2://{{ postgresql_username }}:8GShwQeSMVULP0z1NcE+19QfYcYWKi@/safeboda?host=/cloudsql/safeboda-213615:us-east1:safeboda-sandbox
 
 beta_settings:
   cloud_sql_instances: safeboda-213615:us-east1:safeboda-sandbox

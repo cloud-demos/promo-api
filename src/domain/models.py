@@ -30,8 +30,7 @@ class Event(db.Model):
     name = db.Column(db.String(50))
     radius = db.Column(db.Float)  # in miles
 
-    prom_codes = db.relationship('PromCode', backref='event',
-                                 lazy='dynamic')
+    prom_codes = db.relationship('PromCode', backref='event', lazy='dynamic')
 
     def set_radius(self, radius):
         self.radius = radius
@@ -47,7 +46,8 @@ class PromCode(db.Model):
     code = db.Column(db.String(20), primary_key=True)
     radius = db.Column(db.Float)
     active = db.Column(db.Boolean, default=True)
-    creation_time = db.Column(db.DateTime, nullable=False,
+    creation_time = db.Column(db.DateTime,
+                              nullable=False,
                               default=datetime.datetime.now)
     expiration_time = db.Column(db.DateTime, nullable=False)
 
@@ -132,12 +132,13 @@ def init_database(config_file='../config.py'):
     temp_app = Flask(__name__)
     temp_app.config.from_pyfile(config_file)
 
-    init_datas = [json.loads(open('src/domain/fixtures/initial-data.json')
-                             .read())]
+    init_datas = [
+        json.loads(open('src/domain/fixtures/initial-data.json').read())
+    ]
 
     if temp_app.config["LOCAL"]:
-        init_datas.append(json.loads(open(
-            'src/domain/fixtures/local-data.json').read()))
+        init_datas.append(
+            json.loads(open('src/domain/fixtures/local-data.json').read()))
 
     init_database_common(temp_app, init_datas)
 
@@ -162,13 +163,15 @@ def init_database_common(temp_app, init_datas):
 
 if __name__ == '__main__':
 
-    parser = argparse.ArgumentParser(
-        description='Database utilities')
+    parser = argparse.ArgumentParser(description='Database utilities')
 
     parser.add_argument(
-        '-a', '--action', type=str, default='init',
+        '-a',
+        '--action',
+        type=str,
+        default='init',
         help='Options: init (fill tables whit initial data, this is '
-             'the default), d (delete the tables)')
+        'the default), d (delete the tables)')
 
     args = parser.parse_args()
 
@@ -179,7 +182,6 @@ if __name__ == '__main__':
 
             __tablename__ = 'alembic_version'
             version_num = db.Column(db.String(32), primary_key=True)
-
 
         drop_database()
     else:

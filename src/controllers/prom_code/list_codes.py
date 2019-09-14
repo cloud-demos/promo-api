@@ -17,15 +17,19 @@ getPromoCodeModelDict = {
 GetPromoCodeModel = api.model('GetPromoCodeModel', getPromoCodeModelDict)
 
 pagination_parser = reqparse.RequestParser()
-pagination_parser.add_argument('event_id', type=int, location='args',
+pagination_parser.add_argument('event_id',
+                               type=int,
+                               location='args',
                                required=True)
-pagination_parser.add_argument('page', type=int, location='args',
-                               required=False, default=1)
+pagination_parser.add_argument('page',
+                               type=int,
+                               location='args',
+                               required=False,
+                               default=1)
 
 
 @api.route('/list-active')
 class PromCodeActiveList(Resource):
-
     @api.marshal_with(GetPromoCodeModel, code=200, skip_none=True)
     def get(self):
         """
@@ -41,13 +45,13 @@ class PromCodeActiveList(Resource):
         event_id = args["event_id"]
         page = args.get('page')
 
-        logging.info(f"Geting the active codes of event {event_id}, page {page}")
+        logging.info(
+            f"Geting the active codes of event {event_id}, page {page}")
         return prom_code.get_active_promo_codes(event_id, page)
 
 
 @api.route('/list')
 class PromCodeList(Resource):
-
     @api.marshal_with(GetPromoCodeModel, code=200, skip_none=True)
     def get(self):
         """

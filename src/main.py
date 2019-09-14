@@ -8,6 +8,7 @@ import config
 from controllers import prom_code
 from domain import models
 
+
 def create_app(config_file=config):
     main_app = Flask(__name__,
                      static_folder="dist",
@@ -17,7 +18,8 @@ def create_app(config_file=config):
     main_app.secret_key = config.SECRET_KEY
     main_app.config.from_object(config_file)
 
-    main_app.register_blueprint(prom_code.prom_code_blue_print, url_prefix='/api/v1/code')
+    main_app.register_blueprint(prom_code.prom_code_blue_print,
+                                url_prefix='/api/v1/code')
 
     with main_app.app_context():
         models.init_app(main_app)
@@ -25,6 +27,7 @@ def create_app(config_file=config):
     CORS(main_app, resources={r"/api/*": {"origins": "*"}})
 
     return main_app
+
 
 if config.GENERATE_POSTMAN_COLLECTION:
     import json

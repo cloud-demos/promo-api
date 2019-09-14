@@ -8,18 +8,22 @@ from domain.prom_code import PromoCodeResult
 from domain import prom_code
 
 activation_parser = reqparse.RequestParser()
-activation_parser.add_argument('code', type=str, location='args',
+activation_parser.add_argument('code',
+                               type=str,
+                               location='args',
                                required=True)
 
 
 def deactivate_promo_code_controller(code):
     relation = {
-        PromoCodeResult.PromoCodeDoNotExists:
-            lambda _: {"status": "error",
-                       "reason": "The code do not exists"},
-        PromoCodeResult.Ok:
-            lambda pcode: {'status': "ok",
-                           "code": pcode.code},
+        PromoCodeResult.PromoCodeDoNotExists: lambda _: {
+            "status": "error",
+            "reason": "The code do not exists"
+        },
+        PromoCodeResult.Ok: lambda pcode: {
+            'status': "ok",
+            "code": pcode.code
+        },
     }
     code, res = prom_code.deactivate_promo_code(code)
     return relation[code](res)
@@ -27,7 +31,6 @@ def deactivate_promo_code_controller(code):
 
 @api.route('/deactivate')
 class PromCodeDeactivation(Resource):
-
     def put(self):
         """
             Code deactivation
@@ -45,12 +48,14 @@ class PromCodeDeactivation(Resource):
 
 def activate_promo_code_controller(code):
     relation = {
-        PromoCodeResult.PromoCodeDoNotExists:
-            lambda _: {"status": "error",
-                       "reason": "The code do not exists"},
-        PromoCodeResult.Ok:
-            lambda pcode: {'status': "ok",
-                           "code": pcode.code},
+        PromoCodeResult.PromoCodeDoNotExists: lambda _: {
+            "status": "error",
+            "reason": "The code do not exists"
+        },
+        PromoCodeResult.Ok: lambda pcode: {
+            'status': "ok",
+            "code": pcode.code
+        },
     }
     code, res = prom_code.activate_promo_code(code)
     return relation[code](res)
@@ -58,7 +63,6 @@ def activate_promo_code_controller(code):
 
 @api.route('/activate')
 class PromCodeActivation(Resource):
-
     def put(self):
         """
             Code activation
@@ -76,12 +80,14 @@ class PromCodeActivation(Resource):
 
 def promo_code_is_expired_controller(code):
     relation = {
-        PromoCodeResult.PromoCodeDoNotExists:
-            lambda _: {"status": "error",
-                       "reason": "The code do not exists"},
-        PromoCodeResult.Ok:
-            lambda result: {'status': "ok",
-                            "expired": result},
+        PromoCodeResult.PromoCodeDoNotExists: lambda _: {
+            "status": "error",
+            "reason": "The code do not exists"
+        },
+        PromoCodeResult.Ok: lambda result: {
+            'status': "ok",
+            "expired": result
+        },
     }
     code, res = prom_code.promo_code_is_expired(code)
     return relation[code](res)

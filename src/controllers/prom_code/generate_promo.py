@@ -19,12 +19,14 @@ PromoCodeCreationModel = api.model('PromoCodeCreationModel',
 
 def generate_promo_code_controller(event_id, amount, data):
     relation = {
-        GeneratePromoCodeResult.EventDoNotExists:
-            lambda _: {"status": "error",
-                       "reason": "The event do not exists"},
-        GeneratePromoCodeResult.Ok:
-            lambda pcodes: {"status": "ok",
-                            "codes": list(map(lambda pcode: pcode.code, pcodes))},
+        GeneratePromoCodeResult.EventDoNotExists: lambda _: {
+            "status": "error",
+            "reason": "The event do not exists"
+        },
+        GeneratePromoCodeResult.Ok: lambda pcodes: {
+            "status": "ok",
+            "codes": list(map(lambda pcode: pcode.code, pcodes))
+        },
     }
     code, res = prom_code.generate_promo_code(event_id, amount, data)
     return relation[code](res)
@@ -35,7 +37,6 @@ class PromCodeGenerate(Resource):
     """
         Endpoint to generate promotional codes
     """
-
     @api.expect(PromoCodeCreationModel, validate=True)
     def post(self):
         """
@@ -47,5 +48,6 @@ class PromCodeGenerate(Resource):
         del data["event_id"]
         del data["amount"]
 
-        logging.info(f"Generating {amount} promotional codes for the event: {event_id}")
+        logging.info(
+            f"Generating {amount} promotional codes for the event: {event_id}")
         return generate_promo_code_controller(event_id, amount, data)
