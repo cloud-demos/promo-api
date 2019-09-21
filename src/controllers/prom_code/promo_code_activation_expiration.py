@@ -31,6 +31,7 @@ def deactivate_promo_code_controller(code):
 
 @api.route('/deactivate')
 class PromCodeDeactivation(Resource):
+    @api.expect(activation_parser, validate=True)
     def put(self):
         """
             Code deactivation
@@ -63,6 +64,7 @@ def activate_promo_code_controller(code):
 
 @api.route('/activate')
 class PromCodeActivation(Resource):
+    @api.expect(activation_parser, validate=True)
     def put(self):
         """
             Code activation
@@ -95,6 +97,7 @@ def promo_code_is_expired_controller(code):
 
 @api.route('/expired')
 class PromCodeExpired(Resource):
+    @api.expect(activation_parser, validate=True)
     def get(self):
         """
             Code expiration query

@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
 
 envconsul -prefix sb-common- -prefix sb-common- -prefix flask-common- \
- python src/main.py
+ python -m main
+# python main.py
+

@@ -11,7 +11,7 @@ promoCodeCreationModelDict = {
     'amount': fields.Integer(required=True),
     'radius': fields.Float(required=False),
     'credit': fields.Float(required=False),
-    'expiration_time': fields.DateTime(required=False, dt_format='rfc822'),
+    'expiration_time': fields.DateTime(required=True, dt_format='rfc822'),
 }
 PromoCodeCreationModel = api.model('PromoCodeCreationModel',
                                    promoCodeCreationModelDict)

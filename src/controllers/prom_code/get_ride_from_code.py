@@ -25,7 +25,7 @@ def get_ride_from_prom_code_controller(origin_lat, origin_lng, dest_lat,
     relation = {
         RideFromPromCodeResult.PromCodeDoNotExists: lambda _: {
             "status": "error",
-            "reason": "The event do not exists"
+            "reason": "The Prom Code do not exists"
         },
         RideFromPromCodeResult.PromCodeInactive: lambda _: {
             "status": "error",

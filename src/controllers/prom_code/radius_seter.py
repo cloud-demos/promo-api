@@ -40,7 +40,7 @@ class SetRadiusToEvent(Resource):
         event_id = data["event_id"]
         radius = data["radius"]
 
-        logging.info(f"Seting a new radius to the event: {event_id}")
+        logging.info(f"Setting a new radius to the event: {event_id}")
         return set_radius_to_event_controller(event_id, radius)
 
 
@@ -57,9 +57,9 @@ def spread_radius_in_event_controller(event_id):
             "status": "error",
             "reason": "The event do not exists"
         },
-        SetRadiusFromEventsResult.Ok: lambda event: {
+        SetRadiusFromEventsResult.Ok: lambda promo_codes_affected: {
             'status': "ok",
-            "event_name": event.name
+            "promo_codes_affected": promo_codes_affected
         },
     }
     code, res = prom_code.spread_radius_from_event_to_all_prom_codes(event_id)
@@ -77,7 +77,7 @@ class SpreadRadiusInEvent(Resource):
         event_id = data["event_id"]
 
         logging.info(
-            f"Seting a new radius to all the codes of the event: {event_id}")
+            f"Setting a new radius to all the codes of the event: {event_id}")
         return spread_radius_in_event_controller(event_id)
 
 

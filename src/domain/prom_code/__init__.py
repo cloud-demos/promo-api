@@ -106,7 +106,7 @@ def activate_promo_code(code):
     return PromoCodeResult.Ok, pcode
 
 
-def get_all_promo_codes(event_id, page=1, page_length=50):
+def get_all_promo_codes(event_id, page=1, page_length=10):
     """
         All the codes from an specific event
     :param event_id: The event to query
@@ -114,12 +114,12 @@ def get_all_promo_codes(event_id, page=1, page_length=50):
     :param page_length: Page length
     :return: The corresponding page
     """
-    offset = (page - 1) * page_length
+
     return db.session.query(PromCode).filter(
-        PromCode.event_id == event_id).offset(offset).limit(page_length).all()
+        PromCode.event_id == event_id).paginate(page, page_length, False)
 
 
-def get_active_promo_codes(event_id, page=1, page_length=50):
+def get_active_promo_codes(event_id, page=1, page_length=10):
     """
         All the active codes from an specific event
     :param event_id: The event to query
@@ -127,10 +127,9 @@ def get_active_promo_codes(event_id, page=1, page_length=50):
     :param page_length: Page length
     :return: The corresponding page
     """
-    offset = (page - 1) * page_length
     return db.session.query(PromCode).filter(
         and_(PromCode.active, PromCode.event_id == event_id)) \
-        .offset(offset).limit(page_length).all()
+        .paginate(page, page_length, False)
 
 
 SetRadiusFromEventsResult = Enum('SetRadiusFromEventsResult',
@@ -160,19 +159,21 @@ def spread_radius_from_event_to_all_prom_codes(event_id):
     """
         Sets the event radius to all his codes
     :param event_id: The event to process
-    :return: (EventDoNotExists, None) | (Ok, <the event used>)
+    :return: (EventDoNotExists, None) | (Ok, <how many codes where updated>)
     """
     event = Event.query.get(event_id)
     if not event:
         logging.warning(
-            f"Seting the event radius to all his codes. The event: "
+            f"Setting the event radius to all his codes. The event: "
             f"{event_id} do not exists")
         return SetRadiusFromEventsResult.EventDoNotExists, None
 
+    count = 0
     for pcode in event.prom_codes:
         pcode.set_radius(event.radius)
+        count += 1
 
-    return SetRadiusFromEventsResult.Ok, event
+    return SetRadiusFromEventsResult.Ok, count
 
 
 SetRadiusResult = Enum('SetRadiusResult', 'PromCodeDoNotExists Ok')

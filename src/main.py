@@ -10,10 +10,7 @@ from domain import models
 
 
 def create_app(config_file=config):
-    main_app = Flask(__name__,
-                     static_folder="dist",
-                     static_url_path='',
-                     template_folder="dist")
+    main_app = Flask(__name__)
 
     main_app.secret_key = config.SECRET_KEY
     main_app.config.from_object(config_file)
@@ -25,23 +22,24 @@ def create_app(config_file=config):
         models.init_app(main_app)
 
     CORS(main_app, resources={r"/api/*": {"origins": "*"}})
+    # CORS(main_app, resources={r"/*": {"origins": "*"}})
 
     return main_app
 
 
-if config.GENERATE_POSTMAN_COLLECTION:
-    import json
-
-    app = create_app()
-    with app.app_context():
-        urlvars = False  # Build query strings in URLs
-        swagger = True  # Export Swagger specifications
-        data = prom_code.api.as_postman(urlvars=urlvars, swagger=swagger)
-        open("postman.json", "w").write(json.dumps(data))
-
-app = create_app()
+from flask_graphql import GraphQLView
+from gql import schemas
 
 if __name__ == '__main__':
     app = create_app()
+
+    app.add_url_rule(
+        '/graphql',
+        view_func=GraphQLView.as_view(
+            'graphql',
+            schema=schemas.schema,
+            graphiql=True  # for having the GraphiQL interface
+        ))
+
     app.run(host='localhost', port=8080, debug=True)
 # [END app]
