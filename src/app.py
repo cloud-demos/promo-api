@@ -17,4 +17,4 @@ migrate = Migrate(main_app, models.db)
 if __name__ == '__main__':
     main_app.run(host='localhost', port=8080, debug=True)
 
-migrate = Migrate(main_app, models.db)
+static_url_path='',
