@@ -8,6 +8,7 @@ main_app = Flask(__name__,
                  static_url_path='',
                  template_folder="dist")
 from domain import models
+main_app.run(host='localhost', port=8080, debug=True)
 
 with main_app.app_context():
     models.init_app(main_app)
